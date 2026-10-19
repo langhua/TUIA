@@ -38,6 +38,10 @@ python tools/build_workbook.py
   PDF 用本机 Edge/Chrome 无头打印，两条路不要合并。
 - 重渲 PDF 时**别用阅读器开着那个文件**：Windows 独占锁会让浏览器写失败并**静默保留旧文件**。
   `render_png.py` 已改成先打临时目录再拷回来，拷不进去会直接报错。
+- **PDF 的字节不可复现**（Chromium 每次写新的创建时间与字体子集标签）：重跑后 `git status`
+  显示两个 PDF 改动是正常的，**别为这个单独提交**。判定是否真的变了要比像素：
+  用 pypdfium2 把 HEAD 版与工作区版各渲一张、`ImageChops.difference(...).getbbox() is None`
+  —— 一致就 `git checkout -- docs/figs/*.pdf` 还原（2026-10-19 实测 periodic/heatmap 都像素一致）。
 
 ## 2. 闸门数字（这些一旦变化，必须在提交说明里单独交代原因）
 
