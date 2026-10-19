@@ -14,3 +14,8 @@ __pycache__/
 
 # 临时预览图
 docs/figs/_preview-*.png
+
+# LibreOffice / Excel 打开工作簿时的锁文件
+dist/.~lock*
+~$*
+

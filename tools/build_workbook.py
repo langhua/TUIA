@@ -813,17 +813,29 @@ def sheet_loops(wb: Workbook) -> None:
     df = pd.DataFrame(rows, columns=["闭环", "核反应链", "输入（靶/母体）", "产物",
                                      "再生周期", "闭合性", "要点"])
     widths = [14, 36, 20, 8, 16, 10, 56]
-    end = write_table(ws, df, 5, widths, wrap_cols=[2, 3, 7])
-    for r in range(6, end + 1):
+    section(ws, 4, "一、能回炉的工艺闭环（人工策展）", 7)
+    end = write_table(ws, df, 6, widths, wrap_cols=[2, 3, 7])
+
+    def _loop_color(v: str) -> str:
+        if not v:
+            return "999999"
+        if v.startswith("不可再生"):
+            return "9B2226"
+        if v.startswith("堆外单向"):
+            return "B4803A"
+        if v.startswith("半闭合"):
+            return "7CB342"
+        if v.startswith("闭合"):
+            return "1B5E20"
+        return "999999"
+
+    for r in range(7, end + 1):
         ws.row_dimensions[r].height = 40
-        v = ws.cell(row=r, column=6).value
-        color = {"闭合": "1B5E20", "半闭合": "7CB342", "单向": "E58E7B",
-                 "不可再生": "9B2226"}.get(v, "999999")
         c = ws.cell(row=r, column=6)
-        c.fill = PatternFill("solid", fgColor=color)
+        c.fill = PatternFill("solid", fgColor=_loop_color(str(c.value or "")))
         c.font = Font(name="微软雅黑", size=9, bold=True, color="FFFFFF")
-    ws.auto_filter.ref = f"A5:G{end}"
-    ws.freeze_panes = "C6"
+    ws.auto_filter.ref = f"A6:G{end}"
+    ws.freeze_panes = "C7"
 
     r = end + 2
     section(ws, r, "一个推论", 7)
@@ -832,11 +844,79 @@ def sheet_loops(wb: Workbook) -> None:
              "（233U、3H、238Pu、60Co）的长期成本应该按「维持费」而不是「采购价」来算。"
              "这也解释了为什么 238Pu 的稀缺不是因为难做，而是因为能做它的反应堆与 237Np 库存有限。",
              7, size=10)
+    ws.row_dimensions[r + 1].height = 32
     note_row(ws, r + 3,
              "本页是人工策展的**工艺路线**（反应堆/加速器）；由核数据算出来的**衰变链与发生器**"
              "（母体比子体长寿 10 倍以上的对）见 16_衰变链与发生器 —— 两者互补：一个有工程，一个有物理。"
              "这些路线能不能「闭合」到物理上成立，看的是中子账：见 17_中子截面。",
              7, size=9.5)
+
+    # ---- 二、衰变产物能不能变成材料？（回答「短寿命 → 生成物 → 回循环」这条问法）----
+    r2 = r + 5
+    section(ws, r2, "二、衰变产物能不能变成材料？（「生成物回笼」的三种情况）", 7)
+    ways = [
+        ("中子重造", "同一种核素，但需持续投料", "用中子换时间", "上表 A 类；中子账看 17 页"),
+        ("母体当储库、现场洗脱", "短寿命子体，而且新鲜、无载体", "用母体换纯度", "16 页 36 对发生器"),
+        ("一直衰变到底", "稳定核素，但是**另一种元素**", "用时间换纯度", "下表"),
+    ]
+    wdf = pd.DataFrame(ways, columns=["出路", "拿到的东西", "本质", "本页位置"])
+    endw = write_table(ws, wdf, r2 + 1, [20, 34, 18, 26], wrap_cols=[2])
+
+    # C 类：衰变链终点是稳定核素 —— 链与步数由 decay_chains.csv 现算
+    ch = pd.read_csv(PROC / "decay_chains.csv", encoding="utf-8-sig").set_index("核素")
+    nu = pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig").set_index("isotope")
+    c_note = {
+        "3H": "**唯一的商业成功案例**：³He 是战略中子探测气体、长期短缺，主要来源就是氚（核武库存）衰变。\n"
+              "但它是气体，产量 ∝ 氚库存，不由生产线决定",
+        "90Sr": "⁹⁰Zr 无商品用途；有价值的是 ⁹⁰Sr 本体（β 源、⁹⁰Sr/⁹⁰Y 发生器）",
+        "137Cs": "钡没有同位素需求；¹³⁷Cs 本体才是商品（辐照源、校准源）",
+        "147Pm": "三代才变稳定（钷→钐→钕）；商用的是 ¹⁴⁷Pm 本体（夜光涂料，已基本退场）",
+        "210Po": "²⁰⁶Pb 确有低本底屏蔽与 ²¹⁰Pb 源的用途，但产量被 ²¹⁰Po 卡在克级",
+        "226Ra": "价值全在**中途**：²¹⁰Pb 是 ²¹²Pb 发生器的上游；终点 ²⁰⁶Pb 是铅",
+        "227Ac": "价值全在**中途**：²²⁷Th、²²³Ra、²²⁵Ac；终点 ²⁰⁷Pb 是铅",
+        "238Pu": "中途的 ²³⁴U 可回堆，但要再过中子俘获；终点 ²⁰⁶Pb 是铅",
+        "68Ge": "⁶⁸Ga 是产品；⁶⁸Zn 没人要 —— 链只走 3 步就到稳定，但有用的那一步在中间",
+        "188W": "¹⁸⁸Re 是产品；¹⁸⁸Os 无商品需求",
+        "99Mo": "⁹⁹ᵐTc 是产品；⁹⁹Tc 本身还要反过来嬗变（见 17 页）",
+    }
+    rows_c = []
+    for parent, note in c_note.items():
+        if parent not in ch.index:
+            continue
+        rec = ch.loc[parent]
+        chain = str(rec["链"])
+        term = chain.split("→")[-1].strip()
+        rows_c.append({
+            "母体": parent,
+            "母体半衰期": nu.loc[parent, "半衰期"] if parent in nu.index else "—",
+            "衰变链（主导分支）": chain,
+            "链长": int(rec["链长"]),
+            "终点": term,
+            "终点有商品价值吗": note,
+        })
+    cdf = pd.DataFrame(rows_c)
+    endc = write_table(ws, cdf, endw + 2, [10, 18, 62, 6, 8, 50], wrap_cols=[3, 6])
+    note_row(ws, endc + 1, "「链长」按核素数计（含母体），所以「3H → 3He」记为 2；步数比它少 1。", 7,
+             size=9)
+    for rr in range(endw + 3, endc + 1):
+        ws.row_dimensions[rr].height = 34
+
+    r3 = endc + 3
+    section(ws, r3, "这条路为什么成不了「生产线」", 7)
+    limits = [
+        "① **终点是另一种元素**。⁹⁰Sr 变成锆、¹³⁷Cs 变成钡、氚变成氦 —— 拿到的不是原核素的富集品，"
+        "而是另一种元素。如果想把它当材料用，等于做「元素嬗变提纯」。",
+        "② **纯度不因衰变而变好**。子体与同元素的天然同位素化学性质完全相同，无法用化学法分开；"
+        "所谓高纯度只在**无载体**前提下成立，而无载体又要求母体本身已是化学纯 —— 门槛只是前移了。",
+        "③ **时间常数不可压缩**。产量 ∝ 母体库存，等待时间 = 母体半衰期：⁹⁰Sr 要 29 年、¹³⁷Cs 要 30 年才过半。"
+        "没有「把半衰期缩短」的工程手段，这才是它与 A 类（中子重造）的根本差别。",
+        "**结论**：「短寿命 → 循环 → 没有半衰期的材料」这条路，物理上只给出一个商品成功的例子（³He），"
+        "而它的供应量由氚库存决定。产业界真正的做法是另外两条：把母体当储库现场洗脱短寿命子体"
+        "（⁹⁹ᵐTc、⁶⁸Ga、⁸²Rb、²¹²Pb），或用中子把同一核素重造一遍（²³³U、²³⁸Pu、³H）。",
+    ]
+    for i, t in enumerate(limits, start=1):
+        note_row(ws, r3 + i, t, 7, size=9.5)
+        ws.row_dimensions[r3 + i].height = 32
 
 
 def sheet_scenarios(wb: Workbook) -> None:
