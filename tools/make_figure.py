@@ -124,13 +124,17 @@ def fmt_weight(raw, z: int) -> tuple[str, str]:
 
 
 # 自然界存在、但天然丰度低到无法在饼图上占一个扇区的核素（NIST 无丰度值）
+# 天然存在但丰度低到画不出扇区的核素。
+# 上标写成 (数字, 元素符号) 两段、由 tspan 缩字号 + 抬基线画 ——
+# **不能直接用 Unicode 上标字符**（¹²⁹I 的 ⁹、¹⁰Be 的 ⁰ 在微软雅黑里没有字形，
+# 渲染出来是两个方框，PNG/PDF 都会中招）。
 TRACE = {
-    1: "痕量 ³H",
-    4: "痕量 ¹⁰Be",
-    6: "痕量 ¹⁴C",
-    13: "痕量 ²⁶Al",
-    17: "痕量 ³⁶Cl",
-    53: "痕量 ¹²⁹I",
+    1: ("3", "H"),
+    4: ("10", "Be"),
+    6: ("14", "C"),
+    13: ("26", "Al"),
+    17: ("36", "Cl"),
+    53: ("129", "I"),
 }
 
 
@@ -186,8 +190,11 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
     out.append(f'<text x="9" y="93" font-size="22" font-weight="700" '
                f'fill="{INK}">{z}</text>')
     if z in TRACE:
+        sup, el = TRACE[z]
         out.append(f'<text x="9" y="110" font-size="9" fill="#4A4A4A" '
-                   f'font-family="{FONT}">{esc(TRACE[z])}</text>')
+                   f'font-family="{FONT}">痕量 '
+                   f'<tspan font-size="6.2" dy="-2.6">{sup}</tspan>'
+                   f'<tspan dy="2.6">{el}</tspan></text>')
 
     # 同位素组成饼图（偏左，给右侧标签留出一整列宽位置）
     cx, cy, r = bw - 105, 100, 30

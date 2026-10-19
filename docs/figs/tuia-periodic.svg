@@ -13,7 +13,7 @@
 <text x="181.0" y="18.6" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">S95</text>
 <text x="8" y="64" font-size="42" font-weight="700" fill="#1B1B1B">H</text>
 <text x="9" y="93" font-size="22" font-weight="700" fill="#1B1B1B">1</text>
-<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 ³H</text>
+<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 <tspan font-size="6.2" dy="-2.6">3</tspan><tspan dy="2.6">H</tspan></text>
 <circle cx="100" cy="100" r="30" fill="#2B4B8F"/>
 <path d="M100.00,100.00 L99.98,70.00 A30,30 0 0,1 100.00,70.00 Z" fill="#5BC0BE" stroke="#FFFFFF" stroke-width="0.4"/>
 <text x="100.0" y="99.0" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">1</text>
@@ -64,7 +64,7 @@
 <text x="181.0" y="18.6" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">A77</text>
 <text x="8" y="64" font-size="42" font-weight="700" fill="#1B1B1B">Be</text>
 <text x="9" y="93" font-size="22" font-weight="700" fill="#1B1B1B">4</text>
-<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 ¹⁰Be</text>
+<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 <tspan font-size="6.2" dy="-2.6">10</tspan><tspan dy="2.6">Be</tspan></text>
 <circle cx="100" cy="100" r="30" fill="#2B4B8F"/>
 <text x="100.0" y="99.0" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">9</text>
 <text x="100.0" y="110.5" font-size="8.2" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">100%</text>
@@ -94,7 +94,7 @@
 <text x="181.0" y="18.6" font-size="10.5" font-weight="700" fill="#1B1B1B" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">B56</text>
 <text x="8" y="64" font-size="42" font-weight="700" fill="#1B1B1B">C</text>
 <text x="9" y="93" font-size="22" font-weight="700" fill="#1B1B1B">6</text>
-<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 ¹⁴C</text>
+<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 <tspan font-size="6.2" dy="-2.6">14</tspan><tspan dy="2.6">C</tspan></text>
 <path d="M100.00,100.00 L100.00,70.00 A30,30 0 1,1 97.98,70.07 Z" fill="#2B4B8F" stroke="#FFFFFF" stroke-width="0.4"/>
 <path d="M100.00,100.00 L97.98,70.07 A30,30 0 0,1 100.00,70.00 Z" fill="#5BC0BE" stroke="#FFFFFF" stroke-width="0.4"/>
 <text x="100.0" y="99.0" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">12</text>
@@ -212,7 +212,7 @@
 <text x="181.0" y="18.6" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">S95</text>
 <text x="8" y="64" font-size="42" font-weight="700" fill="#1B1B1B">Al</text>
 <text x="9" y="93" font-size="22" font-weight="700" fill="#1B1B1B">13</text>
-<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 ²⁶Al</text>
+<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 <tspan font-size="6.2" dy="-2.6">26</tspan><tspan dy="2.6">Al</tspan></text>
 <circle cx="100" cy="100" r="30" fill="#2B4B8F"/>
 <text x="100.0" y="99.0" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">27</text>
 <text x="100.0" y="110.5" font-size="8.2" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">100%</text>
@@ -280,7 +280,7 @@
 <text x="181.0" y="18.6" font-size="10.5" font-weight="700" fill="#1B1B1B" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">A73</text>
 <text x="8" y="64" font-size="42" font-weight="700" fill="#1B1B1B">Cl</text>
 <text x="9" y="93" font-size="22" font-weight="700" fill="#1B1B1B">17</text>
-<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 ³⁶Cl</text>
+<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 <tspan font-size="6.2" dy="-2.6">36</tspan><tspan dy="2.6">Cl</tspan></text>
 <path d="M100.00,100.00 L100.00,70.00 A30,30 0 1,1 70.03,98.57 Z" fill="#2B4B8F" stroke="#FFFFFF" stroke-width="0.4"/>
 <path d="M100.00,100.00 L70.03,98.57 A30,30 0 0,1 100.00,70.00 Z" fill="#5BC0BE" stroke="#FFFFFF" stroke-width="0.4"/>
 <text x="100.0" y="99.0" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">35</text>
@@ -1032,7 +1032,7 @@
 <text x="181.0" y="18.6" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">S95</text>
 <text x="8" y="64" font-size="42" font-weight="700" fill="#1B1B1B">I</text>
 <text x="9" y="93" font-size="22" font-weight="700" fill="#1B1B1B">53</text>
-<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 ¹²⁹I</text>
+<text x="9" y="110" font-size="9" fill="#4A4A4A" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">痕量 <tspan font-size="6.2" dy="-2.6">129</tspan><tspan dy="2.6">I</tspan></text>
 <circle cx="100" cy="100" r="30" fill="#2B4B8F"/>
 <text x="100.0" y="99.0" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">127</text>
 <text x="100.0" y="110.5" font-size="8.2" fill="#FFFFFF" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">100%</text>

@@ -33,6 +33,11 @@ python tools/build_workbook.py
 - **改了数据就必须重跑到 `dist/`**，否则仓库里的工作簿与 CSV 不一致。
 - 图的重渲染依赖 **Microsoft YaHei**（Windows）。在别的系统上渲出来的 PNG/PDF 字形会变，
   **渲染后必须人看过再提交**，不要放进自动化流水线。
+- **PDF 走浏览器打印，不走 cairosvg**：cairo 子集化微软雅黑（TTC `msyhbd.ttc`）会失败，
+  出来的 PDF 中文全是乱码（2026-10 交付物事故）。`render_png.py` 里 PNG 用 cairosvg、
+  PDF 用本机 Edge/Chrome 无头打印，两条路不要合并。
+- 重渲 PDF 时**别用阅读器开着那个文件**：Windows 独占锁会让浏览器写失败并**静默保留旧文件**。
+  `render_png.py` 已改成先打临时目录再拷回来，拷不进去会直接报错。
 
 ## 2. 闸门数字（这些一旦变化，必须在提交说明里单独交代原因）
 
