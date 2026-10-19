@@ -69,7 +69,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 |---|---|---|
 | `00_封面` | 图名、论点、规模统计 | 第一次 |
 | `01_导读` | 结构导航、口径、等级图例 | 第一次 |
-| `02_周衍图` | 与周期表同构的热力格（富文本格子） | 看整体格局 |
+| `02_周衍图` | 主图的静态大图（一页看全，100% 还原 SVG 排版） | 看整体格局 |
+| `02b_可及性热力格` | 与周期表同构的格子版：元素 / 评分 / 分离产业国，可筛选 | 查细节 |
 | `03_元素总表` | 118 元素 × 同位素统计 × 最佳可及核素 | 横向比较元素 |
 | `04_IPTEI扩展` | IPTEI 的每元素视图 + 可及性列 | 对照官方图表 |
 | `05_同位素全景` | 3 600 个核素逐条列出（质量、丰度、半衰期、自旋、评分） | 查单个核素 |
@@ -143,11 +144,12 @@ python tools/fetch_wiki.py all      # 逐元素同位素表（半衰期/衰变/�
 python tools/build_dataset.py
 
 # 3) 出图与工作簿
-python tools/make_figure.py
-python tools/build_workbook.py      # -> dist/TUIA_同位素可及性全景扩展.xlsx
+python tools/make_figure.py          # SVG
+python tools/render_png.py           # SVG -> PNG（工作簿内嵌用）
+python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩展.xlsx
 ```
 
-依赖：`pandas`、`lxml`、`openpyxl`（≥3.1，富文本格子需要）。
+依赖：`pandas`、`lxml`、`openpyxl`（≥3.1，富文本格子需要）、`cairosvg` + `pillow`（SVG 转 PNG）。
 
 扩展一个新核素：在 `tools/curation.py` 的 `CURATION` 里加一行
 `(符号, 质量数, 标签, 路线, 成本层级 T0–T4, 量级, 要点)`，重跑第 2、3 步即可。
@@ -219,8 +221,9 @@ TUIA/
 ├─ docs/
 │  ├─ figs/
 │  │  ├─ tuia-periodic.svg        # IPTEI 式方框 + 可及性徽标（主图）
-│  │  ├─ tuia-heatmap.svg         # 可及性热力格（与工作簿 02 同构）
-│  │  └─ tuia-focus-bars.svg      # 焦点核素评分条形图
+│  │  ├─ tuia-heatmap.svg         # 可及性热力格（与工作簿 02b 同构）
+│  │  ├─ tuia-focus-bars.svg      # 焦点核素评分条形图
+│  │  └─ tuia-*.png               # 上述 SVG 的位图版（嵌入工作簿用）
 │  └─ methodology.md              # 字段字典与模型细节
 └─ tools/
    ├─ elements.py                 # 118 元素基础表 + 周期表版式
@@ -232,6 +235,7 @@ TUIA/
    ├─ build_dataset.py            # 合并与评分
    ├─ build_workbook.py           # 生成 xlsx
    ├─ make_figure.py              # 生成 SVG 配图
+   ├─ render_png.py               # SVG -> PNG（cairosvg）
    └─ qa_report.py                # 数据自检
 ```
 

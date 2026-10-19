@@ -13,6 +13,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.cell.rich_text import CellRichText, TextBlock
 from openpyxl.cell.text import InlineFont
+from openpyxl.drawing.image import Image as XLImage
 from openpyxl.formatting.rule import ColorScaleRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
@@ -23,6 +24,7 @@ from scoring import GRADES, METHOD_SCORE, TIER_LABEL, WEIGHTS  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROC = ROOT / "data" / "processed"
+FIGS = ROOT / "docs" / "figs"
 DIST = ROOT / "dist"
 OUT = DIST / "TUIA_同位素可及性全景扩展.xlsx"
 
@@ -213,7 +215,8 @@ def sheet_readme(wb: Workbook) -> None:
 
     section(ws, 4, "一、工作簿结构", 5)
     rows = [
-        ("02_周衍图", "与周期表同构的热力图：每个元素格显示最佳可及同位素的可及性评分", "看整体格局"),
+        ("02_周衍图", "矢量图的静态大图：IPTEI 式方框 + 同位素饼图 + 分离国 + 可及性徽标", "看整体格局"),
+        ("02b_可及性热力格", "与周期表同构的格子版：元素 / 评分 / 分离产业国，可筛选", "查细节"),
         ("03_元素总表", "118 元素的同位素统计 + 最佳可及核素 + 可及性评分与跨度", "横向比较元素"),
         ("04_IPTEI扩展", "IPTEI 的每元素同位素视图，加上「可及性」一列", "对照官方图表"),
         ("05_同位素全景", f"全部核素逐条列出，含推定可及性评分", "查单个核素"),
@@ -236,7 +239,7 @@ def sheet_readme(wb: Workbook) -> None:
             if i % 2 == 0:
                 cell.fill = PatternFill("solid", fgColor=CREAM)
 
-    section(ws, 18, "二、三个必须先说清的口径", 5)
+    section(ws, 19, "二、三个必须先说清的口径", 5)
     notes = [
         "① 「可及性」≠「重要性」。它是采购难度，不是科学价值。半衰期只有几小时的核素往往评分很低，"
         "但它们恰恰是最有价值的诊疗核素——低分说明的是「你必须就在它旁边生产」，不是「它没用」。",
@@ -245,29 +248,29 @@ def sheet_readme(wb: Workbook) -> None:
         "③ 「推定」与「策展」要分清。焦点目录里的 227 条是人工逐条读过路线与量级后写的；"
         "其余三千余条的可及性评分是由丰度与元素级工艺推出的估计值，只适合看趋势。",
     ]
-    r = 19
+    r = 20
     for n in notes:
         note_row(ws, r, n, 4, size=9.5)
         ws.row_dimensions[r].height = 44
         r += 1
 
-    section(ws, 23, "三、等级图例", 5)
-    header_row(ws, 24, ["等级", "分数区间", "含义", "典型例子"],
+    section(ws, 24, "三、等级图例", 5)
+    header_row(ws, 25, ["等级", "分数区间", "含义", "典型例子"],
                [4, 22, 60, 34])
     examples = {
-        "S": "H-1、O-16、Al-27、Na-23、Fe-56",
-        "A": "C-12、Si-28、Li-7、B-11、D2O",
-        "B": "15N、87Rb、Gd-157、B-10、Mo-98",
-        "C": "U-235、Lu-177、I-131、48Ca、76Ge",
-        "D": "225Ac、252Cf、229Th、3He、10Be",
-        "E": "超重元素、单原子合成核素",
+        "S": "1H、16O、27Al、23Na",
+        "A": "9Be（76.7）、56Fe（69.2）、11B（70.3）",
+        "B": "12C（55.9）、28Si（54.8）、18O（63.1）",
+        "C": "235U（43.0）、13C（49.7）、76Ge（42.3）",
+        "D": "3H（33.8）、229Th（21.8）、238Pu（26.3）",
+        "E": "225Ac（12.1）、252Cf（19.0）、超重元素",
     }
     rng = {"S": "80–100", "A": "65–80", "B": "50–65", "C": "35–50",
            "D": "20–35", "E": "0–20"}
     for i, (lo, g, label) in enumerate(GRADES, start=1):
         vals = (g, rng[g], f"{label} —— 需要什么条件才能拿到", examples[g])
         for j, v in enumerate(vals, start=1):
-            cell = ws.cell(row=24 + i, column=j, value=v)
+            cell = ws.cell(row=25 + i, column=j, value=v)
             cell.font = Font(name="微软雅黑", size=9.5, bold=(j == 1),
                              color=GRADE_TEXT[g] if j == 1 else INK)
             cell.border = BOX
@@ -279,8 +282,35 @@ def sheet_readme(wb: Workbook) -> None:
         ws.row_dimensions[25 + i].height = 26
 
 
-def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
+def sheet_periodic_image(wb: Workbook) -> None:
+    """02_周衍图：矢量图的静态大图（一页看全）。"""
     ws = wb.create_sheet("02_周衍图")
+    ws.sheet_view.showGridLines = False
+    ws.sheet_view.zoomScale = 60
+    ws.column_dimensions["A"].width = 3
+
+    ws["A1"] = "周衍图 · 同位素可及性全景扩展"
+    ws["A1"].font = Font(name="微软雅黑", size=16, bold=True, color=NAVY)
+    ws["A2"] = ("本页是矢量图的静态大图（矢量版：docs/figs/tuia-periodic.svg）。"
+                "徽标实心 = 人工策展（62 个元素），空心 = 模型推定（56 个）。"
+                "要筛选、排序、看单条核素，请用 02b、03、05、06 页。")
+    ws["A2"].font = Font(name="微软雅黑", size=9, color=MUTED)
+    ws.row_dimensions[1].height = 24
+
+    png = FIGS / "tuia-periodic.png"
+    if png.exists():
+        img = XLImage(str(png))
+        w0, h0 = img.width, img.height
+        img.width = 1250                       # 显示宽度（像素 @96dpi ≈ 33cm）
+        img.height = int(1250 * h0 / w0)       # 按原始比例缩放，避免拉伸
+        ws.add_image(img, "A4")
+    else:
+        ws["A4"] = "缺少 docs/figs/tuia-periodic.png，请先运行 tools/render_png.py"
+        ws["A4"].font = Font(name="微软雅黑", size=10, color="9B2226")
+
+
+def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
+    ws = wb.create_sheet("02b_可及性热力格")
     ws.sheet_view.showGridLines = False
     ws.column_dimensions["A"].width = 7
     for i in range(2, 20):
@@ -929,6 +959,7 @@ def main() -> None:
     wb = Workbook()
     sheet_cover(wb, nuclides, focus, elems)
     sheet_readme(wb)
+    sheet_periodic_image(wb)
     sheet_periodic(wb, elems)
     sheet_elements(wb, elems)
     sheet_iptei(wb, elems, focus)
