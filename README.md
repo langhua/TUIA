@@ -63,7 +63,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 
 ## 三、产出物
 
-### `dist/TUIA_同位素可及性全景扩展.xlsx`（13 个工作表）
+### `dist/TUIA_同位素可及性全景扩展.xlsx`（16 个工作表）
 
 | 工作表 | 内容 | 什么时候打开 |
 |---|---|---|
@@ -82,6 +82,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `11_数据源` | 逐字段出处与置信度 | 复核 |
 | `12_使用与局限` | 口径、易错点、扩展方法 | 别踩坑 |
 | `13_供应格局` | 59 个元素的分离产业国、置信度与依据 | 看供应链 |
+| `14_同质异能态` | 2 050 条激发态（m-state）：99mTc、229mTh、178m2Hf、111mIn 等 | 查 m 态 |
 
 ### 中间数据（`data/processed/`）
 
@@ -92,6 +93,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia_nuclides.csv` | 合并后的全表，含推定可及性评分（3 600 行） |
 | `tuia_focus.csv` | 策展目录（227 行） |
 | `tuia_elements.csv` | 118 元素汇总 |
+| `tuia_supply.csv` | 59 个元素的分离产业国与置信度 |
+| `tuia_isomers.csv` | 2 050 条同质异能态（104 元素）：半衰期、衰变模式、自旋 |
 
 ---
 
@@ -142,6 +145,7 @@ python tools/fetch_wiki.py all      # 逐元素同位素表（半衰期/衰变/�
 
 # 2) 合并 + 评分
 python tools/build_dataset.py
+python tools/extract_isomers.py      # 同质异能态（m-state）单表
 
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
@@ -233,6 +237,7 @@ TUIA/
    ├─ fetch_nist.py               # 数据抓取
    ├─ fetch_wiki.py
    ├─ build_dataset.py            # 合并与评分
+   ├─ extract_isomers.py          # 抽同质异能态（m-state）
    ├─ build_workbook.py           # 生成 xlsx
    ├─ make_figure.py              # 生成 SVG 配图
    ├─ render_png.py               # SVG -> PNG（cairosvg）

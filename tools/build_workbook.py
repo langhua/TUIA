@@ -228,6 +228,7 @@ def sheet_readme(wb: Workbook) -> None:
         ("11_数据源", "逐字段的出处与置信度", "复核"),
         ("12_使用与局限", "口径、易错点、如何扩展到数千个核素", "别踩坑"),
         ("13_供应格局", "哪些国家有这条分离产线、置信度多少、口径是什么", "看供应链"),
+        ("14_同质异能态", "2050 条激发态：99mTc、229mTh、178m2Hf 都在这里", "查 m 态"),
     ]
     header_row(ws, 5, ["#", "工作表", "内容", "什么时候打开"], [4, 22, 60, 34])
     for i, (a, b, c) in enumerate(rows, start=1):
@@ -239,7 +240,8 @@ def sheet_readme(wb: Workbook) -> None:
             if i % 2 == 0:
                 cell.fill = PatternFill("solid", fgColor=CREAM)
 
-    section(ws, 19, "二、三个必须先说清的口径", 5)
+    last_row = 5 + len(rows)
+    section(ws, last_row + 2, "二、三个必须先说清的口径", 5)
     notes = [
         "① 「可及性」≠「重要性」。它是采购难度，不是科学价值。半衰期只有几小时的核素往往评分很低，"
         "但它们恰恰是最有价值的诊疗核素——低分说明的是「你必须就在它旁边生产」，不是「它没用」。",
@@ -248,14 +250,14 @@ def sheet_readme(wb: Workbook) -> None:
         "③ 「推定」与「策展」要分清。焦点目录里的 227 条是人工逐条读过路线与量级后写的；"
         "其余三千余条的可及性评分是由丰度与元素级工艺推出的估计值，只适合看趋势。",
     ]
-    r = 20
+    r = last_row + 3
     for n in notes:
         note_row(ws, r, n, 4, size=9.5)
         ws.row_dimensions[r].height = 44
         r += 1
 
-    section(ws, 24, "三、等级图例", 5)
-    header_row(ws, 25, ["等级", "分数区间", "含义", "典型例子"],
+    section(ws, r + 1, "三、等级图例", 5)
+    header_row(ws, r + 2, ["等级", "分数区间", "含义", "典型例子"],
                [4, 22, 60, 34])
     examples = {
         "S": "1H、16O、27Al、23Na",
@@ -270,7 +272,7 @@ def sheet_readme(wb: Workbook) -> None:
     for i, (lo, g, label) in enumerate(GRADES, start=1):
         vals = (g, rng[g], f"{label} —— 需要什么条件才能拿到", examples[g])
         for j, v in enumerate(vals, start=1):
-            cell = ws.cell(row=25 + i, column=j, value=v)
+            cell = ws.cell(row=r + 2 + i, column=j, value=v)
             cell.font = Font(name="微软雅黑", size=9.5, bold=(j == 1),
                              color=GRADE_TEXT[g] if j == 1 else INK)
             cell.border = BOX
@@ -279,7 +281,7 @@ def sheet_readme(wb: Workbook) -> None:
                 cell.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
             elif i % 2 == 0:
                 cell.fill = PatternFill("solid", fgColor=CREAM)
-        ws.row_dimensions[25 + i].height = 26
+        ws.row_dimensions[r + 2 + i].height = 26
 
 
 def sheet_periodic_image(wb: Workbook) -> None:
@@ -949,6 +951,46 @@ def sheet_supply(wb: Workbook) -> None:
              "碳-12 富集之所以贵，不是化学难，而是这条产线只在四个国家里。", 9, size=10)
 
 
+def sheet_isomers(wb: Workbook) -> None:
+    ws = wb.create_sheet("14_同质异能态")
+    title_block(ws, "14 · 同质异能态",
+                "同一个质量数、不同的能级 —— 核医学与精密测量真正依赖的那一类核素", 9)
+    df = pd.read_csv(PROC / "tuia_isomers.csv").sort_values(["z", "A", "meta"])
+
+    from curation import ISOMERS
+    note_by = {(s, a): n for s, a, _t, _r, _c, _q, n in ISOMERS}
+    df["说明"] = [note_by.get((s, int(a)), "") for s, a in zip(df["sym"], df["A"])]
+
+    cols = ["z", "sym", "isotope", "A", "meta", "半衰期", "decay_modes", "spin", "说明"]
+    view = df[cols].copy()
+    view.columns = ["Z", "元素", "同质异能态", "A", "能级标记", "半衰期",
+                    "衰变模式", "自旋 I", "说明"]
+    widths = [5, 6, 13, 5, 8, 18, 34, 10, 62]
+    end = write_table(ws, view, 4, widths, wrap_cols=[7, 9])
+    for r in range(5, end + 1):
+        if ws.cell(row=r, column=9).value:
+            for c in range(1, 10):
+                ws.cell(row=r, column=c).fill = PatternFill("solid", fgColor="FFF3CD")
+    ws.auto_filter.ref = f"A4:I{end}"
+    ws.freeze_panes = "D5"
+
+    r = end + 2
+    section(ws, r, "口径", 9)
+    notes = [
+        "① 05_同位素全景 只收**基态**核素；本表是同一批质量数上的激发态（m、m1、m2…）。"
+        "核医学里最重要的一批核素全部属于这一类：99mTc（6.01 h）、111mIn、137mBa。",
+        "② 数据来自 Wikipedia 逐元素同位素表的全量提取，共 2050 条 —— 比 NUBASE 的精选口径（约 700 条）更宽，"
+        "包含许多只有纳秒寿命的高激发态。做计算请以 NUBASE2020 为准。",
+        "③ 黄色行是人工加过说明的：229mTh 的核跃迁能量仅约 8 eV，是核钟的物理基础；"
+        "178m2Hf（31 年）曾被寄望为「核同质异能储能」，其可行性已被反复证伪。",
+        "④ 同质异能态的「可及性」与基态完全不同：99mTc 由 99Mo 发生器洗脱，"
+        "而不是像 99Tc 那样从乏燃料里提取 —— 见 06_可及性目录 的同质异能态条目。",
+    ]
+    for i, t in enumerate(notes, start=1):
+        note_row(ws, r + i, t, 9, size=9.5)
+        ws.row_dimensions[r + i].height = 34
+
+
 # ------------------------------------------------------------------ 主流程
 
 def main() -> None:
@@ -972,6 +1014,7 @@ def main() -> None:
     sheet_sources(wb)
     sheet_limits(wb)
     sheet_supply(wb)
+    sheet_isomers(wb)
 
     for ws in wb.worksheets:
         ws.sheet_properties.tabColor = NAVY
