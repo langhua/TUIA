@@ -294,7 +294,8 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 数据疑误与建议 → [GitHub Issues](https://github.com/langhua/TUIA/issues)；
 报数据问题时请带上**核素名 + 你看到的数值 + 你依据的出处**，便于逐条核。
 
-口径与复验路径：`docs/methodology.md`（方法与局限）、`data/README.md`（CSV 索引与复现命令）。
+口径与复验路径：`docs/methodology.md`（方法与局限）、`data/README.md`（CSV 索引与复现命令）、
+`docs/roadmap.md`（已知开口与下一步）、`AGENTS.md`（改本仓前必读的规则与闸门数字）。
 
 ---
 
@@ -303,6 +304,7 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 ```
 TUIA/
 ├─ dist/                          # 交付物（xlsx）
+├─ AGENTS.md                      # 本仓规则：怎么跑、闸门数字、不能做什么
 ├─ requirements.txt               # 生成链依赖
 ├─ data/
 │  ├─ raw/                        # 抓取的原始页面与 AMDC 原表（不入库）
@@ -315,7 +317,8 @@ TUIA/
 │  │  ├─ tuia-periodic.png        # 2 400 px，嵌入工作簿
 │  │  ├─ tuia-periodic@4k.png     # 3 840 px，网页首屏/印刷
 │  │  └─ tuia-heatmap.png / @2x.png
-│  └─ methodology.md              # 字段字典与模型细节
+│  ├─ methodology.md              # 字段字典与模型细节
+│  └─ roadmap.md                  # 已知开口与可选的下一步
 └─ tools/
    ├─ elements.py                 # 118 元素基础表 + 周期表版式
    ├─ scoring.py                  # 七维评分模型
