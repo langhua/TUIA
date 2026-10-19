@@ -1,0 +1,7 @@
+﻿来源,类型,页面原话,能拿到价吗,结论
+NIDC（DOE 同位素计划，isotopes.gov/catalog）,官方目录,“Elements shown in blue indicate that isotopes are available for quotation… click on the cart button to complete your quote request”,否，只能询价,目录页与产品页均不标价；报价按单回复
+Sigma-Aldrich（CIL 稳定同位素分销，D₂O 99.9 atom %）,商业目录,“Sign In to View Organizational & Contract Pricing.”,否，需登录,标价藏在登录墙后，不可抓取/不可引用
+BuyIsotope（Neonest AB）,商业目录,入口一律是 “REQUEST STABLE ISOTOPE QUOTE / REQUEST ENRICHED ISOTOPE QUOTE”,否，报价制,只有清单与工艺说明，无价
+Trace Sciences International,商业目录,全站只有一个 “Get A Quote” 入口,否，报价制,同上
+IAEA / AMDC（NUBASE2020、AME2020）,核数据评估,只发布核性质（半衰期、质量、自旋、衰变分支）,不适用,本仓的核数据来源，但不含任何价格
+U.S. EIA Form EIA-858（铀市场年报 Table S1b / S2 / Table 4）,成交量申报,“weighted-average price … 58.46 per pound U3O8e”（2025 年，按品种与来源分列）,**是**，逐年、可机器解析,燃料循环侧唯一拿到手的实测成交价序列

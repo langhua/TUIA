@@ -86,7 +86,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia-heatmap.svg` / `.png` / `@2x.png` | 可及性热力格（与工作簿 `02b` 同构） |
 | `tuia-focus-bars.svg` | 焦点核素评分条形图 |
 
-### `dist/TUIA_同位素可及性全景扩展.xlsx`（20 个工作表）
+### `dist/TUIA_同位素可及性全景扩展.xlsx`（21 个工作表）
 
 | 工作表 | 内容 | 什么时候打开 |
 |---|---|---|
@@ -110,6 +110,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `16_衰变链与发生器` | 由衰变分支算出的子体：36 对发生器候选 + 5 对异构体馈入 + 最长链 | 找发生器 |
 | `17_中子截面` | ENDF/B-VIII.0 的 2200 m/s 截面、共振积分，与 α / 转换比 / 嬗变时间 | 算中子账 |
 | `18_谱平均与自屏` | 六个谱下的平均截面、截面比随谱硬度的变化、NR 自屏 f 因子 | 看谱形影响 |
+| `19_成本实测与标定` | EIA 成交价（2003–2025）、由成交价推出的单位成本、T 层级与实测的对照 | 看钱从哪来 |
 
 ### 中间数据（`data/processed/`）
 
@@ -131,6 +132,11 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `xs_index.csv` | 由截面算出的 α、热谱转换比、嬗变时间、¹⁹⁷Au 校验 |
 | `xs_spec.csv` | 6 个谱下的谱平均截面（19 行 × 6 谱） |
 | `xs_shield.csv` | NR 自屏后的有效俘获截面与 f 因子（4 个核素 × 6 个 σb） |
+| `prices_fuelcycle.csv` | 2003–2025 年 U3O8 加权/现货/长协价（$/lb U3O8e）、折 $/kgU、SWU 价 |
+| `prices_derived.csv` | 4.5% / 19.75% / 90% 三档丰度的进料量、分离功、$/kgU 与每克 ²³⁵U 成本 |
+| `prices_material2025.csv` | 2025 年按物料形态（U3O8 / 天然 UF6 / 浓缩 UF6）的成交量与成交价 |
+| `price_vs_tier.csv` | 价格锚点 → 元/g → 实测 T 层级 vs 策展 T 层级（差几个数量级） |
+| `price_sources.csv` | 6 个候选价格来源的逐条核查（页面原话、能不能拿到价） |
 | `nubase_vs_wiki.csv` | 基态半衰期逐条对账（3 099 条可比，2 932 条一致 = 94.6%） |
 | `nubase_vs_isomers.csv` | 激发态逐条对账（2 050 条：一致 1 823 / 差异 56 / NUBASE 无 35 / 缺值 104） |
 
@@ -197,6 +203,11 @@ python tools/parse_xs.py            # → σ(0.0253 eV)、共振积分
 python tools/xs_index.py            # → α / 转换比 / 嬗变时间
 python tools/xs_spectrum.py         # → 谱平均截面 / 自屏 f 因子
 
+# 3b) 成本实测（可选，只做「钱」的判断时需要）
+python tools/fetch_prices.py        # EIA 铀市场年报的 XLSX（EIA-858）
+python tools/parse_prices.py        # → 成交价 + 由成交价推出的单位成本
+python tools/price_check.py        # → T 层级与实测的对照 + 来源核查表
+
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
 python tools/render_png.py           # SVG -> PNG（工作簿内嵌用）
@@ -223,7 +234,7 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 | 衰变模式与分支强度 | **NUBASE2020 的 BR 列**（含分支百分比，如 40K 的 β− 89.28% / β+ 10.72%） | 权威 |
 | 自旋 I（Jpi） | **NUBASE2020**（评估值）；NUBASE 未收录的核素才回落到维基 | 权威 |
 | 中子截面 | **ENDF/B-VIII.0**（NNDC，294 K）逐点截面；本仓取 30 个核素的 (n,γ)/(n,f)/(n,p)/(n,t)/(n,α) | 权威 |
-| 成本层级、可得量级、管制负担 | 本仓人工策展（`tools/curation.py`） | **量级估计**，非报价 |
+| 成本层级、可得量级、管制负担 | 本仓人工策展（`tools/curation.py`）；T 层级用 **EIA Form EIA-858 成交价**标定（`19_成本实测与标定`） | 铀/浓缩那一段是实测成交价；其余核素仍是量级估计 |
 | 用途标签 | 人工策展 | 定性 |
 
 **必须说清的三件事**
@@ -231,6 +242,9 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 1. **可及性 ≠ 重要性。** 评分低说明「你必须就在它旁边生产」，不说明它没用。
 2. **成本与量级是数量级判断。** T0–T4 用于横向比较；真实价格随反应堆档期、合同规模、
    同位素纯度波动，可能相差 3–5 倍。
+   **唯一有实测锚点的是铀**：2025 年 U3O8 加权成交价 58.46 $/lb → 152 $/kgU（≈1.08 元/g），
+   天然铀（T1）与 HEU 里的 ²³⁵U（T3）都与策展档对得上；³H 则低估计 2.9 个数量级（详见 `19`）。
+   其余核素**没有公开价**（NIDC 与经销商全部询价制），只能给量级 —— 这不是没查，是查完的结论。
 3. **「策展」与「推定」要分清。** 227 条焦点核素是逐条读过路线与量级后写的；
    其余三千余条的评分由丰度 + 元素级工艺推出，只适合看趋势。
 
@@ -305,6 +319,9 @@ TUIA/
    ├─ parse_xs.py                 # σ(0.0253 eV)、共振积分
    ├─ xs_index.py                 # α / 转换比 / 嬗变时间
    ├─ xs_spectrum.py              # 谱平均截面 / 共振自屏
+   ├─ fetch_prices.py             # EIA 铀市场年报（XLSX）
+   ├─ parse_prices.py             # 成交价 / 单位成本
+   ├─ price_check.py              # T 层级标定 + 来源核查
    ├─ build_dataset.py            # 合并与评分
    ├─ extract_isomers.py          # 抽同质异能态（m-state）
    ├─ build_workbook.py           # 生成 xlsx
