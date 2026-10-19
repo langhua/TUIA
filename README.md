@@ -61,7 +61,30 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 
 ---
 
+## 二·补、图上怎么读（看缩略图前先看这四条）
+
+| 看到什么 | 含义 |
+|---|---|
+| 饼图扇区大小 | 该元素的**天然同位素丰度**；扇区旁或圆内标「质量数 + 百分比」 |
+| 灰色圆 + 圆内数字 | 该元素**没有天然同位素**（Tc、Pm、Np 及之后的全部元素），圆内数字 = 该元素的**质量数**（取值优先取 NIST/IUPAC 的标准原子量方括号值） |
+| 原子量写 `[98]` | **没有标准原子量**（没有稳定同位素），方括号内是惯例采用的同位素质量数，与灰圆里的数字一致 |
+| 左侧「痕量 ³H」之类 | 天然存在、但丰度低到画不出扇区（³H、¹⁰Be、¹⁴C、²⁶Al、³⁶Cl、¹²⁹I） |
+| 右上徽标（如 `B56`） | 可及性**等级 + 评分**；**实心 = 人工策展**（62 个元素），空心 = 模型推定（56 个） |
+| 底部「分离 US·RU·CN」行 | 公开可查的**稳定同位素分离产业**所在国；单同位素元素没有这条产业，故不标 |
+
+---
+
 ## 三、产出物
+
+### 图（`docs/figs/`）
+
+| 文件 | 用途 |
+|---|---|
+| `tuia-periodic.svg` | 矢量原图（3 872 × 2 838 设计单位），无限缩放 |
+| `tuia-periodic.png` | 2 400 px 宽，嵌进工作簿 `02_周衍图` |
+| `tuia-periodic@4k.png` | 3 840 px 宽，给网页首屏 / 截图 / 印刷 —— 图里最小字号（同位素标签 8.2px）在全宽下才读得出 |
+| `tuia-heatmap.svg` / `.png` / `@2x.png` | 可及性热力格（与工作簿 `02b` 同构） |
+| `tuia-focus-bars.svg` | 焦点核素评分条形图 |
 
 ### `dist/TUIA_同位素可及性全景扩展.xlsx`（17 个工作表）
 
@@ -159,7 +182,9 @@ python tools/render_png.py           # SVG -> PNG（工作簿内嵌用）
 python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩展.xlsx
 ```
 
-依赖：`pandas`、`lxml`、`openpyxl`（≥3.1，富文本格子需要）、`cairosvg` + `pillow`（SVG 转 PNG）。
+依赖见 `requirements.txt`（`python -m pip install -r requirements.txt`）：
+`pandas`、`numpy`、`lxml`、`html5lib`、`openpyxl`（≥3.1，富文本格子需要）、
+`cairosvg` + `pillow`（SVG 转 PNG）。
 
 扩展一个新核素：在 `tools/curation.py` 的 `CURATION` 里加一行
 `(符号, 质量数, 标签, 路线, 成本层级 T0–T4, 量级, 要点)`，重跑第 2、3 步即可。
@@ -226,15 +251,18 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 ```
 TUIA/
 ├─ dist/                          # 交付物（xlsx）
+├─ requirements.txt               # 生成链依赖
 ├─ data/
-│  ├─ raw/                        # 抓取的原始页面（不入库）
+│  ├─ raw/                        # 抓取的原始页面与 AMDC 原表（不入库）
 │  └─ processed/                  # 合并后的 CSV（含 tuia_supply.csv）
 ├─ docs/
 │  ├─ figs/
-│  │  ├─ tuia-periodic.svg        # IPTEI 式方框 + 可及性徽标（主图）
+│  │  ├─ tuia-periodic.svg        # IPTEI 式方框 + 可及性徽标（主图，矢量）
 │  │  ├─ tuia-heatmap.svg         # 可及性热力格（与工作簿 02b 同构）
 │  │  ├─ tuia-focus-bars.svg      # 焦点核素评分条形图
-│  │  └─ tuia-*.png               # 上述 SVG 的位图版（嵌入工作簿用）
+│  │  ├─ tuia-periodic.png        # 2 400 px，嵌入工作簿
+│  │  ├─ tuia-periodic@4k.png     # 3 840 px，网页首屏/印刷
+│  │  └─ tuia-heatmap.png / @2x.png
 │  └─ methodology.md              # 字段字典与模型细节
 └─ tools/
    ├─ elements.py                 # 118 元素基础表 + 周期表版式

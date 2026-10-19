@@ -1,0 +1,10 @@
+# TUIA 生成链依赖（Python 3.11+）
+# 安装：python -m pip install -r requirements.txt
+
+pandas>=2.0          # 数据合并与评分
+numpy>=1.24
+lxml>=4.9            # pandas.read_html 解析维基表格
+html5lib>=1.1        # read_html 的兜底解析器
+openpyxl>=3.1        # 生成 xlsx（富文本、条件格式、嵌图）
+cairosvg>=2.7        # SVG -> PNG
+pillow>=10.0         # PNG 尺寸与嵌入

@@ -186,16 +186,16 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
     out.append(f'<text x="9" y="93" font-size="22" font-weight="700" '
                f'fill="{INK}">{z}</text>')
     if z in TRACE:
-        out.append(f'<text x="9" y="110" font-size="7.5" fill="{MUTED}">'
+        out.append(f'<text x="9" y="110" font-size="8.5" fill="{MUTED}">'
                    f'{esc(TRACE[z])}</text>')
 
-    # 同位素组成饼图
-    cx, cy, r = bw - 65, 98, 29
+    # 同位素组成饼图（偏左，给右侧标签留出一整列宽位置）
+    cx, cy, r = bw - 105, 100, 30
     total_ab = sum(a for _, a in isotopes if a > 0)
     if not isotopes or total_ab <= 0:
         out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#8A8A8A"/>')
         mark = str(fallback_a) if fallback_a else "—"
-        out.append(f'<text x="{cx}" y="{cy + 5}" font-size="13" font-weight="700" '
+        out.append(f'<text x="{cx}" y="{cy + 5.5}" font-size="14" font-weight="700" '
                    f'fill="#FFFFFF" text-anchor="middle" font-family="{FONT}">{mark}</text>')
     else:
         items = sorted(isotopes, key=lambda t: t[0])          # 按质量数递增绘制
@@ -204,24 +204,28 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
         ang = 0.0                                             # 从 12 点开始顺时针
         right: list[list] = []
         left: list[list] = []
+        # 扇区与圆内文字必须分两趟画：文字夹在循环里时，后面画的扇区会盖掉
+        # 先前画好的文字（Sb 的“121 / 57.21%”就被 123 的扇区盖成了“21 / ?21%”）。
+        slices: list[str] = []
+        centre: list[str] = []
         for a, frac in items:
             span = 360.0 * frac / total
             a0, a1 = ang, ang + span
             colour = SLICE_COLORS[rank[a] % len(SLICE_COLORS)]
             if span >= 359.5:
-                out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{colour}"/>')
+                slices.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{colour}"/>')
             else:
-                out.append(f'<path d="{slice_path(cx, cy, r, a0, a1)}" fill="{colour}" '
-                           f'stroke="#FFFFFF" stroke-width="0.4"/>')
+                slices.append(f'<path d="{slice_path(cx, cy, r, a0, a1)}" fill="{colour}" '
+                              f'stroke="#FFFFFF" stroke-width="0.4"/>')
             mid = a0 + span / 2
             ang = a1
             if frac >= 0.5:      # 主同位素：标在圆内（质量数 + 百分比）
-                out.append(f'<text x="{cx:.1f}" y="{cy - 0.5:.1f}" font-size="12.5" '
-                           f'font-weight="700" fill="#FFFFFF" text-anchor="middle" '
-                           f'font-family="{FONT}">{a}</text>')
-                out.append(f'<text x="{cx:.1f}" y="{cy + 9.5:.1f}" font-size="7.6" '
-                           f'fill="#FFFFFF" text-anchor="middle" '
-                           f'font-family="{FONT}">{esc(fmt_pct(frac))}</text>')
+                centre.append(f'<text x="{cx:.1f}" y="{cy - 1:.1f}" font-size="13.5" '
+                              f'font-weight="700" fill="#FFFFFF" text-anchor="middle" '
+                              f'font-family="{FONT}">{a}</text>')
+                centre.append(f'<text x="{cx:.1f}" y="{cy + 10.5:.1f}" font-size="8.2" '
+                              f'fill="#FFFFFF" text-anchor="middle" '
+                              f'font-family="{FONT}">{esc(fmt_pct(frac))}</text>')
             else:
                 ex, ey = _pt(cx, cy, r + 1.5, mid)
                 sin_mid = math.sin(math.radians(mid))
@@ -234,17 +238,23 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
                     right.append([a, ex, ey, mid, pct])   # 正上方 → 右上
                 else:
                     left.append([a, ex, ey, mid, pct])    # 正下方 → 左下
+        out += slices
+        out += centre
 
-        # 左右两侧标签：双行（质量数 / 百分比），按 y 排序后逐个拉开
-        for group, sign, lo, hi in ((right, 1, cy - 58, cy + 52),
-                                    (left, -1, cy - 26, cy + 52)):
+        # 左右两侧标签：单行「质量数 百分比」。
+        # ① 必须单行 —— 两行（质量数 / 百分比）在 9–10 个同位素的元素（Sn、Te、Xe）上
+        #    会两两相叠，百分比根本读不出；单行能把同样的高度装下约两倍条目。
+        # ② 左侧列的 y 下限必须压到 Z（y=93）与「痕量」行（y=110）以下，
+        #    否则标签会压在元素符号上（Sn 就是这样重叠过）。
+        for group, sign, lo, hi in ((right, 1, 34, cy + 62),
+                                    (left, -1, 128, cy + 62)):
             if not group:
                 continue
             group.sort(key=lambda t: t[2])
             ys = [g[2] for g in group]
             for i in range(1, len(ys)):
-                if ys[i] - ys[i - 1] < 19.0:
-                    ys[i] = ys[i - 1] + 19.0
+                if ys[i] - ys[i - 1] < 13.0:
+                    ys[i] = ys[i - 1] + 13.0
             span = ys[-1] - ys[0]
             room = hi - lo
             if len(ys) > 1 and span > room:      # 标签太多，均匀压缩
@@ -256,25 +266,28 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
                 if ys[-1] > hi:
                     ys = [v - (ys[-1] - hi) for v in ys]
             for (a, ex, ey, mid, pct), ty in zip(group, ys):
-                tw = max(len(str(a)) * 5.6, len(pct) * 3.95)
+                label = f"{a} {pct}"
+                tw = est_text_width(label, 8.2)
                 if sign > 0:
                     tx = bw - 7
-                    lend = tx - tw - 2
+                    lend = tx - tw - 3
                 else:
                     tx = cx - r - 8
-                    lend = tx + 2
-                kx, ky = _pt(cx, cy, r + 6, mid)          # 先径向出圈，再折向标签
+                    lend = tx + 3
+                kx, ky = _pt(cx, cy, r + 10, mid)         # 先径向快出圈
+                # 折线走「径向 → 竖直 → 水平」：直接斜着连到标签会从饼图上穿过，
+                # 多同位素元素上一堆斜线会盖住扇区、也读不清连的是哪块。
                 out.append(f'<polyline points="{ex:.1f},{ey:.1f} {kx:.1f},{ky:.1f} '
-                           f'{lend:.1f},{ty + 1:.1f}" fill="none" stroke="{INK}" '
-                           f'stroke-width="0.65"/>')
-                out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" font-size="9" '
+                           f'{kx:.1f},{ty - 2.6:.1f} {lend:.1f},{ty - 2.6:.1f}" '
+                           f'fill="none" stroke="{INK}" stroke-width="0.65"/>')
+                out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" font-size="8.2" '
                            f'font-weight="600" fill="{INK}" text-anchor="end" '
-                           f'font-family="{FONT}">{a}</text>')
-                out.append(f'<text x="{tx:.1f}" y="{ty + 8.6:.1f}" font-size="7" '
-                           f'fill="#3A3A3A" text-anchor="end" '
-                           f'font-family="{FONT}">{esc(pct)}</text>')
+                           f'font-family="{FONT}">{esc(label)}</text>')
 
-    # 原子量（白字，IPTEI 版式）
+    # 原子量（白字，IPTEI 版式）。无标准原子量时写 [A]（A = 最长寿核素的质量数），
+    # 比一个破折号有用，也和灰圆里的数字对得上。
+    if not str(std_weight or "").strip() and fallback_a:
+        std_weight = f"[{fallback_a}]"
     main, interval = fmt_weight(std_weight, z)
     if not main and interval:
         out.append(f'<text x="9" y="{bh - 40}" font-size="15" font-weight="700" '
@@ -304,10 +317,10 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
 
 
 def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -> str:
-    bw, bh, gap = 190, 214, 6
-    mx, top = 40, 176
+    bw, bh, gap = 205, 232, 6
+    mx, top = 40, 208
     w = mx * 2 + 18 * (bw + gap) - gap
-    h = top + 10 * (bh + gap) + 232
+    h = top + 10 * (bh + gap) + 250
 
     by_z = elems.set_index("Z")
     cur = ELEMENTS
@@ -329,6 +342,17 @@ def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -
         if len(cand):
             longest[int(z)] = int(cand.sort_values("half_life_s").iloc[-1]["A"])
 
+    def bracket_a(raw: str) -> int | None:
+        """从 NIST 的 "[98]" 取质量数。"""
+        m = re.match(r"^\s*\[(\d+)\]\s*$", str(raw or "").strip())
+        return int(m.group(1)) if m else None
+
+    def no_weight_marks(z: int) -> int | None:
+        """无标准原子量的元素该标哪个质量数：优先 NIST 的方括号值，
+        否则取表中最长寿核素 —— 灰圆中心与原子量处必须用同一个数，
+        否则像 Tc 会出现「圆里写 97、原子量写 [98]」的自相矛盾。"""
+        return bracket_a(std_by_z.get(z, "")) or longest.get(z)
+
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
            f'viewBox="0 0 {w} {h}" font-family="{FONT}">',
            f'<rect width="{w}" height="{h}" fill="{BG}"/>',
@@ -337,12 +361,15 @@ def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -
            f'<text x="{w / 2:.0f}" y="102" font-size="19" font-weight="600" fill="{GOLD}" '
            f'text-anchor="middle" letter-spacing="2">TUIA · The Universal Isotope Atlas</text>',
            f'<rect x="{w / 2 - 90:.0f}" y="116" width="180" height="2" fill="{GOLD}"/>',
-           f'<text x="{w / 2:.0f}" y="142" font-size="12" fill="{MUTED}" text-anchor="middle">'
-           f'每个方框是一个元素的同位素组成：扇区大小按天然丰度，标签为「质量数 + 丰度百分比」；'
-           f'左侧「痕量」行标出天然存在但丰度低到画不出扇区的核素（如 ³H）。</text>',
-           f'<text x="{w / 2:.0f}" y="160" font-size="12" fill="{MUTED}" text-anchor="middle">'
+           f'<text x="{w / 2:.0f}" y="146" font-size="15.5" font-weight="600" fill="{INK}" '
+           f'text-anchor="middle">'
+           f'每个方框是一个元素的同位素组成：扇区大小按天然丰度，旁标「质量数 丰度%」</text>',
+           f'<text x="{w / 2:.0f}" y="169" font-size="13" fill="{MUTED}" text-anchor="middle">'
+           f'灰色圆 = 无天然同位素（圆心数字为最长寿核素的质量数）；方括号如 [98] = 无标准原子量，'
+           f'括号内同样是最长寿核素的质量数（IUPAC 2021 惯例）；左侧「痕量」行 = 天然存在但丰度低到画不出扇区</text>',
+           f'<text x="{w / 2:.0f}" y="190" font-size="13" fill="{MUTED}" text-anchor="middle">'
            f'右上角徽标 = 可及性等级与评分；底部「分离」行 = 稳定同位素分离产业所在国；'
-           f'数据来自 NIST / IUPAC 2021 / Wikipedia，可及性模型见 tools/scoring.py</text>']
+           f'数据来自 NIST / IUPAC 2021 / Wikipedia + NUBASE2020 核对，模型见 tools/scoring.py</text>']
 
     for z, (col, row) in GRID.items():
         e = cur[z - 1]
@@ -355,7 +382,7 @@ def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -
             std_weight=std_by_z.get(z, ""),
             isotopes=iso_by_z.get(z, []),
             x=x, y=y, bw=bw, bh=bh,
-            fallback_a=longest.get(z),
+            fallback_a=no_weight_marks(z),
             source=str(rec.get("最佳可及来源", "推定")),
         )
 
@@ -365,62 +392,74 @@ def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -
                f'镧系 / 锕系（57–71、89–103）</text>')
 
     # 图例一：元素类别
-    ly = top + 10 * (bh + gap) + 34
-    out.append(f'<text x="{mx}" y="{ly}" font-size="11" font-weight="700" '
+    ly = top + 10 * (bh + gap) + 40
+    out.append(f'<text x="{mx}" y="{ly}" font-size="13" font-weight="700" '
                f'fill="{NAVY}">元素类别</text>')
     for i, (cat, colour) in enumerate(CAT_FILL.items()):
-        x = mx + 68 + i * 148
-        out.append(f'<rect x="{x}" y="{ly - 10}" width="13" height="13" fill="{colour}" '
+        x = mx + 84 + i * 168
+        out.append(f'<rect x="{x}" y="{ly - 11}" width="15" height="15" fill="{colour}" '
                    f'stroke="{INK}" stroke-width="0.8"/>')
-        out.append(f'<text x="{x + 18}" y="{ly + 1}" font-size="10.5" fill="{INK}">'
+        out.append(f'<text x="{x + 21}" y="{ly + 1}" font-size="12.5" fill="{INK}">'
                    f'{esc(cat)}</text>')
 
     # 图例二：可及性等级
-    ly2 = ly + 30
-    out.append(f'<text x="{mx}" y="{ly2}" font-size="11" font-weight="700" '
+    ly2 = ly + 36
+    out.append(f'<text x="{mx}" y="{ly2}" font-size="13" font-weight="700" '
                f'fill="{NAVY}">可及性等级</text>')
     gname = [("S", "随手可得"), ("A", "常规采购"), ("B", "需专门渠道"),
              ("C", "稀缺/受限"), ("D", "实验室级别"), ("E", "仅少数机构可产")]
     for i, (g, label) in enumerate(gname):
-        x = mx + 68 + i * 148
-        out.append(f'<rect x="{x}" y="{ly2 - 10}" width="26" height="13" rx="2" '
+        x = mx + 84 + i * 168
+        out.append(f'<rect x="{x}" y="{ly2 - 11}" width="30" height="15" rx="2" '
                    f'fill="{GRADE_FILL[g]}"/>')
-        out.append(f'<text x="{x + 13}" y="{ly2 + 0.5}" font-size="9" font-weight="700" '
+        out.append(f'<text x="{x + 15}" y="{ly2 + 0.5}" font-size="10" font-weight="700" '
                    f'fill="{GRADE_TEXT[g]}" text-anchor="middle">{g}</text>')
-        out.append(f'<text x="{x + 32}" y="{ly2 + 1}" font-size="10.5" fill="{INK}">'
+        out.append(f'<text x="{x + 37}" y="{ly2 + 1}" font-size="12.5" fill="{INK}">'
                    f'{esc(label)}</text>')
 
     # 图例二之二：实心 = 策展，空心 = 推定
     n_cur = sum(1 for zz in GRID if str(by_z.loc[zz].get("最佳可及来源", "")) == "策展")
-    lx = mx + 68 + len(gname) * 148 + 22
-    out.append(f'<rect x="{lx}" y="{ly2 - 10}" width="30" height="13" rx="2" '
+    lx = mx + 84 + len(gname) * 168 + 26
+    out.append(f'<rect x="{lx}" y="{ly2 - 11}" width="34" height="15" rx="2" '
                f'fill="{NAVY}"/>')
-    out.append(f'<text x="{lx + 15}" y="{ly2 + 0.5}" font-size="9" font-weight="700" '
+    out.append(f'<text x="{lx + 17}" y="{ly2 + 0.5}" font-size="10" font-weight="700" '
                f'fill="#FFFFFF" text-anchor="middle">S</text>')
-    out.append(f'<text x="{lx + 36}" y="{ly2 + 1}" font-size="10.5" fill="{INK}">'
+    out.append(f'<text x="{lx + 41}" y="{ly2 + 1}" font-size="12.5" fill="{INK}">'
                f'实心 = 策展（{n_cur} 格，人工读过路线与量级）</text>')
-    lx2 = lx + 300
-    out.append(f'<rect x="{lx2}" y="{ly2 - 10}" width="30" height="13" rx="2" '
+    lx2 = lx + 372
+    out.append(f'<rect x="{lx2}" y="{ly2 - 11}" width="34" height="15" rx="2" '
                f'fill="#FFFFFF" stroke="{NAVY}" stroke-width="1.4"/>')
-    out.append(f'<text x="{lx2 + 15}" y="{ly2 + 0.5}" font-size="9" font-weight="700" '
+    out.append(f'<text x="{lx2 + 17}" y="{ly2 + 0.5}" font-size="10" font-weight="700" '
                f'fill="{NAVY}" text-anchor="middle">S</text>')
-    out.append(f'<text x="{lx2 + 36}" y="{ly2 + 1}" font-size="10.5" fill="{INK}">'
+    out.append(f'<text x="{lx2 + 41}" y="{ly2 + 1}" font-size="12.5" fill="{INK}">'
                f'空心 = 推定（{118 - n_cur} 格，模型推算）</text>')
 
     # 图例三：分离产业国
-    ly3 = ly2 + 26
-    out.append(f'<text x="{mx}" y="{ly3}" font-size="11" font-weight="700" '
+    ly3 = ly2 + 32
+    out.append(f'<text x="{mx}" y="{ly3}" font-size="13" font-weight="700" '
                f'fill="{NAVY}">分离产业国</text>')
-    out.append(f'<text x="{mx + 68}" y="{ly3 + 1}" font-size="10.5" fill="{INK}">'
+    out.append(f'<text x="{mx + 84}" y="{ly3 + 1}" font-size="12.5" fill="{INK}">'
                f'方框底部一行「分离 US·RU·CN」= 公开可查的稳定同位素分离产业所在国；'
                f'单同位素元素无此产业，故不标。粗粒度判断，未列 ≠ 无能力。</text>')
 
-    out.append(f'<text x="{mx}" y="{h - 42}" font-size="10" fill="{MUTED}">'
-               f'读法示例：碳的饼图里 12（98.93%）与 13（1.07%），徽标 B56，分离 US·RU·CN·JP —— '
+    # 图例四：饼图与质量数标记（回应「灰色圆圈 / [98] 是什么」这类疑问）
+    ly4 = ly3 + 32
+    out.append(f'<text x="{mx}" y="{ly4}" font-size="13" font-weight="700" '
+               f'fill="{NAVY}">饼图标记</text>')
+    gy = ly4 - 11
+    out.append(f'<circle cx="{mx + 100}" cy="{gy + 8}" r="11" fill="#8A8A8A"/>')
+    out.append(f'<text x="{mx + 100}" y="{gy + 11.5}" font-size="9.5" font-weight="700" '
+               f'fill="#FFFFFF" text-anchor="middle">98</text>')
+    out.append(f'<text x="{mx + 120}" y="{ly4 + 1}" font-size="12.5" fill="{INK}">'
+               f'灰圆 = 无天然同位素（Tc、Pm、Np 以后全部元素），圆心数字 = 最长寿核素的质量数；'
+               f'原子量处写 [98] 同理：无标准原子量，方括号内为该质量数</text>')
+
+    out.append(f'<text x="{mx}" y="{h - 56}" font-size="12.5" fill="{MUTED}">'
+               f'读法示例：碳的饼图里 12 98.93% 与 13 1.07%，徽标 B56，分离 US·RU·CN·JP —— '
                f'「碳」很便宜，但「碳-12 富集到 99.9%」只在这四个国家里做。</text>')
-    out.append(f'<text x="{mx}" y="{h - 26}" font-size="10" fill="{MUTED}">'
+    out.append(f'<text x="{mx}" y="{h - 36}" font-size="12.5" fill="{MUTED}">'
                f'方框底色只表示元素类别；可及性只用右上角徽标表示，两者互不干扰。</text>')
-    out.append(f'<text x="{mx}" y="{h - 10}" font-size="9" fill="{MUTED}">'
+    out.append(f'<text x="{mx}" y="{h - 14}" font-size="10.5" fill="{MUTED}">'
                f'本图为 TUIA 项目独立绘制（数据自 NIST / IUPAC 2021 汇总后自行计算），'
                f'编排思路参考 IUPAC IPTEI；不是 IUPAC 官方发布物，与 IUPAC 无隶属关系。</text>')
     out.append("</svg>")
