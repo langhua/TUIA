@@ -105,8 +105,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `11_数据源` | 逐字段出处与置信度 | 复核 |
 | `12_使用与局限` | 口径、易错点、扩展方法 | 别踩坑 |
 | `13_供应格局` | 59 个元素的分离产业国、置信度与依据 | 看供应链 |
-| `14_同质异能态` | 2 050 条激发态（m-state）：99mTc、229mTh、178m2Hf、111mIn 等 | 查 m 态 |
-| `15_NUBASE对账` | 与 IAEA/AMDC 的 NUBASE2020 逐条比半衰期，标出一致 / 有差异 / 显著分歧 | 验数据 |
+| `14_同质异能态` | 2 050 条激发态（m-state）：激发能、半衰期、NUBASE 核对、按能级挂的说明 | 查 m 态 |
+| `15_NUBASE对账` | 基态与激发态的逐条核对：一致 / 有差异 / 显著分歧 / NUBASE 无此能级 | 验数据 |
 
 ### 中间数据（`data/processed/`）
 
@@ -119,8 +119,9 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia_elements.csv` | 118 元素汇总 |
 | `tuia_supply.csv` | 59 个元素的分离产业国与置信度 |
 | `tuia_isomers.csv` | 2 050 条同质异能态（104 元素）：半衰期、衰变模式、自旋 |
-| `nubase2020.csv` | NUBASE2020 全表解析（5 843 条：3 558 基态 + 2 285 非基态） |
-| `nubase_vs_wiki.csv` | 半衰期逐条对账结果（3 099 条可比，2 932 条一致 = 94.6%） |
+| `nubase2020.csv` | NUBASE2020 全表解析（5 843 条：3 558 基态 + 2 285 非基态，含激发能与 Jpi） |
+| `nubase_vs_wiki.csv` | 基态半衰期逐条对账（3 099 条可比，2 932 条一致 = 94.6%） |
+| `nubase_vs_isomers.csv` | 激发态逐条对账（2 050 条：一致 1 823 / 差异 56 / NUBASE 无 35 / 缺值 104） |
 
 ---
 
@@ -169,12 +170,12 @@ Base = Σ w_i · S_i
 python tools/fetch_nist.py          # NIST 全核素质量与丰度
 python tools/fetch_wiki.py all      # 逐元素同位素表（半衰期/衰变/自旋）
 python tools/fetch_nubase.py        # NUBASE2020 / AME2020 原始表（IAEA AMDC）
+python tools/parse_nubase.py         # NUBASE -> 结构化 CSV（下面 build_dataset 要用它的自旋）
 
 # 2) 合并 + 评分
 python tools/build_dataset.py
 python tools/extract_isomers.py      # 同质异能态（m-state）单表
-python tools/parse_nubase.py         # NUBASE2020 → 结构化 CSV
-python tools/qa_nubase.py            # 半衰期逐条对账
+python tools/qa_nubase.py            # 基态 + 激发态逐条对账
 
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
@@ -197,8 +198,9 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 |---|---|---|
 | 原子序数、符号、质量数、原子质量 | NIST *Atomic Weights and Isotopic Compositions*（AME2020 汇编） | 权威 |
 | 天然丰度 | 同上 | 权威 |
-| 半衰期、衰变模式、子体、自旋 | Wikipedia「Isotopes of *X*」，逐元素 118 页 | 汇编 |
-| 半衰期核对 | **NUBASE2020**（IAEA AMDC，Chin. Phys. C 45, 030001）：3 099 条可比，**94.6% 一致**；60 条显著分歧已逐条列出（见 `15_NUBASE对账`） | 权威（评估表） |
+| 半衰期、衰变模式、子体 | Wikipedia「Isotopes of *X*」，逐元素 118 页 | 汇编 |
+| 半衰期核对 | **NUBASE2020**（IAEA AMDC，Chin. Phys. C 45, 030001）：基态 3 099 条可比，**94.6% 一致**；激发态 1 823/2 050（88.9%）与同能级一致 | 权威（评估表） |
+| 自旋 I（Jpi） | **NUBASE2020**（评估值）；NUBASE 未收录的核素才回落到维基 | 权威 |
 | 成本层级、可得量级、管制负担 | 本仓人工策展（`tools/curation.py`） | **量级估计**，非报价 |
 | 用途标签 | 人工策展 | 定性 |
 

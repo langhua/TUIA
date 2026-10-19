@@ -31,6 +31,34 @@ OUT_ELEM = PROC / "tuia_elements.csv"
 OUT_SUPPLY = PROC / "tuia_supply.csv"
 
 
+def clean_jpi(text: str) -> str:
+    """NUBASE 的 Jpi -> 表里的自旋。
+
+    只做三件事：去掉尾部的 T=（同位旋）项、去掉 `*`（直接测量，属常态）、
+    把 ASCII 负号换成真正的减号；`#`（系统性估计）**保留** —— 那是例外情况，
+    抹掉就分不出「量过」和「估的」了。
+    """
+    t = str(text or "").strip()
+    if not t or t.lower() in {"nan", "none"}:
+        return ""
+    t = t.split("T=")[0].strip()
+    t = t.replace("*", "")
+    t = re.sub(r"\s+", " ", t)
+    t = re.sub(r"\(([^)]*?),\s+", r"(\1,", t)      # "(1−, 2−)" -> "(1−,2−)"
+    return t.replace("-", "\u2212").strip()
+
+
+def load_nubase_jpi() -> dict[tuple[int, int], str]:
+    """基态 (z, A) -> NUBASE2020 的 Jpi。文件不存在时返回空表（降级到维基自旋）。"""
+    path = PROC / "nubase2020.csv"
+    if not path.exists():
+        return {}
+    nb = pd.read_csv(path, encoding="utf-8-sig")
+    gs = nb[nb["idx"] == 0]
+    return {(int(z), int(a)): clean_jpi(j)
+            for z, a, j in zip(gs["z"], gs["A"], gs["Jpi"])}
+
+
 def fix_exponent(text: str) -> str:
     """'5.70×103 y' -> '5.70×10^3 y'，并清理不可见空格与脚注标记。"""
     t = str(text or "").replace("\u00a0", " ")
@@ -182,6 +210,10 @@ def main() -> None:
     df["天然丰度%"] = [None if pd.isna(f) else round(float(f) * 100, 6)
                        for f in df["abundance_frac"]]
     df["自旋.I"] = df["spin"].fillna("").replace({"nan": ""})
+    # 自旋优先用 NUBASE2020 的 Jpi（评估值）；NUBASE 没收录的核素才回落到维基口径。
+    jpi = load_nubase_jpi()
+    df["自旋.I"] = [jpi.get((int(z), int(a))) or s
+                 for z, a, s in zip(df["z"], df["A"], df["自旋.I"])]
     df["decay_modes"] = [clean_chain(t) for t in df["decay_modes"]]
     df["daughters"] = [clean_chain(t) for t in df["daughters"]]
 

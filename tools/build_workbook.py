@@ -812,9 +812,12 @@ def sheet_sources(wb: Workbook) -> None:
          "3352 条记录，含放射性核素"),
         ("天然丰度", "NIST Isotopic Composition",
          "同上", "权威", "288 个核素有丰度值（稳定 + 原生放射性）"),
-        ("半衰期 / 衰变模式 / 自旋", "Wikipedia「Isotopes of <element>」",
-         "en.wikipedia.org/wiki/Isotopes_of_<element>", "汇编（二手）",
-         "3494 个核素；原始出处应为 NUBASE2020"),
+        ("半衰期 / 衰变模式", "Wikipedia「Isotopes of <element>」＋ **NUBASE2020 逐条核对**",
+         "en.wikipedia.org/wiki/Isotopes_of_<element>；IAEA AMDC nubase_4.mas20.txt",
+         "汇编 + 评估值核对", "3494 个核素；基态 3099 条可比，94.6% 一致，分歧见 15 页"),
+        ("自旋 I（Jpi）", "**NUBASE2020**（评估值）",
+         "IAEA AMDC，Chin. Phys. C 45, 030001 (2021)", "权威（评估表）",
+         "NUBASE 未收录的核素才回落到维基；NUBASE 的 `#`（系统性估计）标记保留"),
         ("同位素纯度上限", "工艺经验值", "本工作簿 07_评分模型", "估计", "按工艺类别给出，非具体产品规格"),
         ("成本层级 T0–T4", "量级判断", "本工作簿 07_评分模型", "估计（±1 个数量级）",
          "不构成报价；真实价格随档期与合同波动"),
@@ -839,11 +842,12 @@ def sheet_sources(wb: Workbook) -> None:
     r = end + 2
     section(ws, r, "如果要做到「可发布级」精度，下一步应该接这些源", 5)
     up = [
-        "NUBASE2020（核素性质总表，约 3500 条，含半衰期、衰变分支、自旋）",
-        "AME2020（原子质量评估，取代 NIST 汇编里的质量值）",
-        "IUPAC IPTEI 官方图表（每元素同位素可视化的权威版式）",
+        "NUBASE2020 全表 — 已接入：半衰期已逐条对账（15 页），自旋已换成评估值",
+        "AME2020 质量表 — 已下载，尚未替换表里的 NIST 原子量",
+        "衰变分支与强度（NUBASE 的 BR 列）— 已解析出来，尚未替换 05 页的衰变模式",
         "ENDF/B-VIII.0 或 JENDL-5（中子截面与反应道，做「再生闭环」定量必须有）",
         "IAEA 同位素价格与产能调查（成本层级从估计升级为实测）",
+        "IUPAC IPTEI 官方图表（仅作版式参考；本工作簿与其中图形均独立绘制）",
     ]
     for i, t in enumerate(up, start=1):
         note_row(ws, r + i, f"{i}. {t}", 5, size=9.5)
@@ -868,7 +872,8 @@ def sheet_limits(wb: Workbook) -> None:
     section(ws, 11, "不能做的（务必别误用）", 5)
     cannot = [
         "不能当报价单：成本层级是数量级，误差可以达到 ±1 个数量级，且不随时间更新。",
-        "不能当核数据表：半衰期与自旋来自二手汇编，做计算前请以 NUBASE2020 / ENDF 为准。",
+        "不能当核数据表：半衰期已对过 NUBASE2020、自旋已换成 NUBASE，但质量、衰变分支、"
+        "中子截面仍未对齐评估表；做计算前请以 NUBASE2020 / AME2020 / ENDF 原件为准。",
         "不能覆盖全部核素：约 3200 个核素的可及性评分是推定的，只有 227 条经过人工策展。",
         "不能替代法规判断：管制负担只是相对分值，真实许可取决于国家法规与用途。",
         "不评价「该不该做」：本表只描述获得难度，不涉及伦理、扩散与出口管制合规。",
@@ -955,43 +960,63 @@ def sheet_supply(wb: Workbook) -> None:
 def sheet_isomers(wb: Workbook) -> None:
     ws = wb.create_sheet("14_同质异能态")
     title_block(ws, "14 · 同质异能态",
-                "同一个质量数、不同的能级 —— 核医学与精密测量真正依赖的那一类核素", 9)
+                "同一个质量数、不同的能级 —— 核医学与精密测量真正依赖的那一类核素", 11)
     df = pd.read_csv(PROC / "tuia_isomers.csv").sort_values(["z", "A", "meta"])
 
     from curation import ISOMERS
-    note_by = {(s, a): n for s, a, _t, _r, _c, _q, n in ISOMERS}
-    df["说明"] = [note_by.get((s, int(a)), "") for s, a in zip(df["sym"], df["A"])]
+    # 说明必须按（元素, 质量数, 能级标记）挂：只按质量数挂会把 178m2Hf 的话
+    # 一并贴到 4.0 s 的 178m1Hf 上，也会把 66 h（基态 99Mo）贴到微秒级的 99m1Mo 上。
+    note_by = {(s, a, m): n for s, a, m, _t, _r, _c, _q, n in ISOMERS}
+    df["说明"] = [note_by.get((s, int(a), str(m)), "")
+                 for s, a, m in zip(df["sym"], df["A"], df["meta"])]
 
-    cols = ["z", "sym", "isotope", "A", "meta", "半衰期", "decay_modes", "spin", "说明"]
+    # NUBASE：激发能（只在能级编号对得上时填）+ 半衰期核对结果
+    chk = pd.read_csv(PROC / "nubase_vs_isomers.csv").set_index("核素")
+    mark = {"一致": "✓", "一致≈": "✓≈", "近似": "≈", "近似≈": "≈",
+            "差异": "差异", "差异≈": "差异≈", "NUBASE 无": "NUBASE 无",
+            "缺值": ""}
+    df["激发能_keV"] = [chk.at[i, "NUBASE激发能_keV"] if i in chk.index else None
+                     for i in df["isotope"]]
+    df["核对"] = [mark.get(chk.at[i, "判定"], "") if i in chk.index else ""
+                 for i in df["isotope"]]
+
+    cols = ["z", "sym", "isotope", "A", "meta", "激发能_keV", "半衰期",
+            "decay_modes", "spin", "核对", "说明"]
     view = df[cols].copy()
-    view.columns = ["Z", "元素", "同质异能态", "A", "能级标记", "半衰期",
-                    "衰变模式", "自旋 I", "说明"]
-    widths = [5, 6, 13, 5, 8, 18, 34, 10, 62]
-    end = write_table(ws, view, 4, widths, wrap_cols=[7, 9])
+    view.columns = ["Z", "元素", "同质异能态", "A", "能级标记", "激发能 keV",
+                    "半衰期", "衰变模式", "自旋 I", "NUBASE 核对", "说明"]
+    widths = [5, 6, 13, 5, 8, 11, 17, 30, 10, 12, 58]
+    end = write_table(ws, view, 4, widths, wrap_cols=[8, 11])
     for r in range(5, end + 1):
-        if ws.cell(row=r, column=9).value:
-            for c in range(1, 10):
+        if ws.cell(row=r, column=11).value:
+            for c in range(1, 12):
                 ws.cell(row=r, column=c).fill = PatternFill("solid", fgColor="FFF3CD")
-    ws.auto_filter.ref = f"A4:I{end}"
+        v = str(ws.cell(row=r, column=10).value or "")
+        if v.startswith("差异"):
+            ws.cell(row=r, column=10).fill = PatternFill("solid", fgColor="FFCDD2")
+        elif v.startswith("="):
+            ws.cell(row=r, column=10).fill = PatternFill("solid", fgColor="FFE0B2")
+    ws.auto_filter.ref = f"A4:K{end}"
     ws.freeze_panes = "D5"
 
     r = end + 2
-    section(ws, r, "口径", 9)
+    section(ws, r, "口径", 11)
     notes = [
         "① 05_同位素全景 只收**基态**核素；本表是同一批质量数上的激发态（m、m1、m2…）。"
-        "核医学里最重要的一批核素全部属于这一类：99mTc（6.01 h）、111mIn、137mBa。",
-        "② 数据来自 Wikipedia 逐元素同位素表的全量提取，共 2050 条。对照 NUBASE2020：\n"
-        "   评估值共 2285 个非基态条目（1841 同质异能态 + 243 能级 + 186 IAS + 11 共振），两边口径不同 ——\n"
-        "   维基偏「文献报过就收」，NUBASE 偏「评估过才收」。做计算一律以 NUBASE2020 为准，\n"
-        "   逐条对账见 15_NUBASE对账。",
-        "③ 黄色行是人工加过说明的：229mTh 的核跃迁能量仅约 8 eV，是核钟的物理基础；"
-        "178m2Hf（31 年）曾被寄望为「核同质异能储能」，其可行性已被反复证伪。",
-        "④ 同质异能态的「可及性」与基态完全不同：99mTc 由 99Mo 发生器洗脱，"
-        "而不是像 99Tc 那样从乏燃料里提取 —— 见 06_可及性目录 的同质异能态条目。",
+        "核医学里最重要的一批核素全部属于这一类：99mTc（6.01 h）、111mIn（7.7 min）、137m1Ba（2.55 min）。",
+        "② 数据来自 Wikipedia 逐元素同位素表的全量提取，共 2050 条；激发能与核对列来自 NUBASE2020。"
+        "两边收录范围不同（NUBASE 非基态 2285 条：1841 同质异能态 + 243 能级 + 186 IAS + 11 共振），"
+        "做计算一律以 NUBASE2020 为准。",
+        "③ 「NUBASE 核对」列：✓ = 半衰期与 NUBASE 同能级一致（±5%）；✓≈ / ≈ = 能级编号对不上，"
+        "按同质量数里最接近的激发态比；差异 = 差超过 2 倍；NUBASE 无 = 评估表里没有这个能级。",
+        "④ 黄色行是人工加过说明的，且说明**按能级**挂：178m2Hf（31 a）与 178m1Hf（4.0 s）不是一回事，"
+        "110m2Ag（250 d）与 110m1Ag（660 ns）也不是；111mIn 的 7.7 min 与基态 111In 的 2.80 d 同理。",
+        "⑤ 同质异能态的「可及性」与基态完全不同：99mTc 由 99Mo 发生器洗脱，"
+        "而不是像 99Tc 那样从乏燃料里提取 —— 见 06_可及性目录。",
     ]
     for i, t in enumerate(notes, start=1):
-        note_row(ws, r + i, t, 9, size=9.5)
-        ws.row_dimensions[r + i].height = 34
+        note_row(ws, r + i, t, 11, size=9.5)
+        ws.row_dimensions[r + i].height = 36
 
 
 def sheet_nubase_qa(wb: Workbook) -> None:
@@ -1052,15 +1077,44 @@ def sheet_nubase_qa(wb: Workbook) -> None:
     ws.auto_filter.ref = f"A14:I{end}"
     ws.freeze_panes = "C15"
 
-    r = end + 2
+    # 激发态（m 态）对账
+    iso_cmp = pd.read_csv(PROC / "nubase_vs_isomers.csv")
+    vci = iso_cmp["判定"].value_counts()
+    n_iso_same = int(vci.get("一致", 0) + vci.get("一致≈", 0))
+    rs = end + 3
+    section(ws, rs, "二、激发态（m 态）对账", 10)
+    header_row(ws, rs + 1, ["指标", "数值", "说明"], [30, 22, 78])
+    iso_stats = [
+        ("维基 m 态条数", f"{len(iso_cmp)}", "14_同质异能态 的全量"),
+        ("NUBASE 非基态", "2285", "1841 同质异能态 + 243 能级 + 186 IAS + 11 共振"),
+        ("半衰期与同能级一致（±5%）", f"{n_iso_same}（{n_iso_same / max(len(iso_cmp), 1):.1%}）",
+         "按能级编号配对，含「≈」的近似配对"),
+        ("差异（>2 倍）", f"{int(vci.get('差异', 0) + vci.get('差异≈', 0))}",
+         "多数是维基给的是上限值（如 <0.1 µs）或能级排序不同"),
+        ("NUBASE 里没有这个能级", f"{int(vci.get('NUBASE 无', 0))}",
+         "维基报过、评估表未收，属于「文献值」而非「评估值」"),
+        ("有一侧没给半衰期", f"{int(vci.get('缺值', 0))}", "无法比较，不强行给结论"),
+    ]
+    for i, (k, v, note) in enumerate(iso_stats, start=1):
+        for j, val in enumerate((k, v, note), start=1):
+            cell = ws.cell(row=rs + 1 + i, column=j, value=val)
+            cell.font = Font(name="微软雅黑", size=9.5, bold=(j == 1), color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+
+    r = rs + len(iso_stats) + 3
     section(ws, r, "口径", 10)
     notes = [
-        "① 只比基态：两边的激发态收录范围不同（维基 2050 条 vs NUBASE 2285 个非基态条目），无法一一对应。",
+        "① 基态按 (Z, A) 直接连；激发态按能级编号配对（维基 m/m1/m2 ↔ NUBASE idx 1/2/3），"
+        "能级排序对不上时退一步在同质量数里找最接近的，并标「≈」。",
         "② 「一致」= |log10(维基/NUBASE)| ≤ 0.02（约 5%）；5%–2 倍记「有差异」；超过 2 倍记「显著分歧」。",
         "③ 用比值而不是差：半衰期跨 30 个数量级，只有比值才有可比性。",
         "④ 显著分歧里有相当一部分是 NUBASE 的「系统性估计」（文件名里带 # 的数），"
         "这类值本就只是量级参考，不能当成测量值。",
-        "⑤ 本表只核对半衰期；质量、自旋、衰变分支尚未逐条比对。",
+        "⑤ 本表核对的是半衰期；自旋已改用 NUBASE 的 Jpi（见 05_同位素全景），"
+        "质量与衰变分支尚未逐条比对。",
     ]
     for i, t in enumerate(notes, start=1):
         note_row(ws, r + i, t, 10, size=9.5)

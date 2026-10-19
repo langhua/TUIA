@@ -1,13 +1,15 @@
-"""把 TUIA 现有（维基来源）的基态核素数据与 NUBASE2020 对账。
+"""把 TUIA 现有（维基来源）的核素数据与 NUBASE2020 对账。
 
 产出：
-- data/processed/nubase_vs_wiki.csv  逐条对照（基态，按 (Z, A) 连接）
-- 控制台摘要：覆盖率、半衰期一致率、分歧最大者
+- data/processed/nubase_vs_wiki.csv      基态逐条对照（按 (Z, A) 连接）
+- data/processed/nubase_vs_isomers.csv   激发态（m 态）逐条对照
+- 控制台摘要
 
 口径：
-- 只比基态（NUBASE idx=0）；激发态在两边的收录范围不同（维基 2050 条 vs NUBASE 1841 条），
-  不能一一对应，故只统计条数，不做逐条比对。
-- 半衰期比值用 log10 差；|Δlog10| ≤ 0.02（≈5%）记为"一致"。
+- 基态：按 (Z, A) 直接连，比半衰期（log10 比值）。|Δlog10| ≤ 0.02（≈5%）记「一致」。
+- 激发态：维基写 m / m1 / m2（第几个激发态），NUBASE 写 idx = 1,2,3…
+  所以先按同号配对；NUBASE 的能级排序未必与维基一致，同号配不上时退一步
+  在同一 (Z, A) 的激发态里找半衰期最接近的，并把结果记成「≈」。
 """
 
 from __future__ import annotations
@@ -20,6 +22,57 @@ import pandas as pd
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROC = ROOT / "data" / "processed"
+
+
+def _meta_to_idx(meta: str) -> int:
+    """维基的 m / m1 / m2 -> NUBASE 的激发态序号 1 / 1 / 2。"""
+    m = str(meta).strip()
+    if m == "m":
+        return 1
+    digits = m[1:]
+    return int(digits) if digits.isdigit() else 1
+
+
+def compare_isomers(iso: pd.DataFrame, nb: pd.DataFrame) -> pd.DataFrame:
+    """激发态逐条对照；返回逐核素带判定的一行一核素表。"""
+    fam: dict[tuple[int, int], list[tuple[int, float, float]]] = {}
+    for _, r in nb[nb["idx"] > 0].iterrows():
+        fam.setdefault((int(r["z"]), int(r["A"])), []).append(
+            (int(r["idx"]), r["半衰期_s"], r["激发能_keV"]))
+
+    rows = []
+    for _, r in iso.iterrows():
+        want = _meta_to_idx(r["meta"])
+        cands = fam.get((int(r["z"]), int(r["A"])), [])
+        ours = r["half_life_s"]
+        pick = next((c for c in cands if c[0] == want), None)
+        approx = ""
+        if pick is None and cands:
+            usable = [c for c in cands if pd.notna(c[1]) and c[1] > 0]
+            if usable and pd.notna(ours) and ours > 0:
+                pick = min(usable, key=lambda c: abs(math.log10(ours / c[1])))
+            else:
+                pick = cands[0]
+            approx = "≈"
+
+        if pick is None:
+            verdict, theirs, exc = "NUBASE 无", None, None
+        else:
+            theirs, exc = pick[1], pick[2]
+            if pd.isna(ours) or pd.isna(theirs) or ours <= 0 or theirs <= 0:
+                verdict = "缺值"
+            else:
+                d = abs(math.log10(ours / theirs))
+                verdict = "一致" if d <= 0.02 else ("近似" if d <= 0.3 else "差异")
+                verdict += approx
+
+        rows.append({
+            "核素": r["isotope"], "z": int(r["z"]), "sym": r["sym"],
+            "A": int(r["A"]), "meta": r["meta"], "idx": want,
+            "维基半衰期": r["半衰期"], "维基_秒": ours,
+            "NUBASE_秒": theirs, "NUBASE激发能_keV": exc, "判定": verdict,
+        })
+    return pd.DataFrame(rows)
 
 
 def main() -> None:
@@ -57,6 +110,10 @@ def main() -> None:
     out = out.sort_values("log10差", key=lambda s: s.abs(), ascending=False)
     out.to_csv(PROC / "nubase_vs_wiki.csv", index=False, encoding="utf-8-sig")
 
+    iso_cmp = compare_isomers(iso, nb)
+    iso_cmp.to_csv(PROC / "nubase_vs_isomers.csv", index=False, encoding="utf-8-sig")
+    n_iso_ok = int(iso_cmp["判定"].isin(["一致", "一致≈"]).sum())
+
     n = len(cmp)
     print(f"维基基态 {len(wiki)} 条 / NUBASE 基态 {len(gs)} 条 / 双方都有 {len(both)} 条")
     print(f"仅维基 {len(only_wiki)} 条，仅 NUBASE {len(only_nb)} 条")
@@ -65,6 +122,12 @@ def main() -> None:
     print(f"激发态条数：维基 {len(iso)} vs NUBASE {(nb['idx'] > 0).sum()}")
     print("NUBASE 激发态构成：" + " / ".join(
         f"{k} {v}" for k, v in nb.loc[nb["idx"] > 0, "态"].value_counts().items()))
+    print("  逐条判定：" + " / ".join(
+        f"{k} {v}" for k, v in iso_cmp["判定"].value_counts().items()))
+    print(f"  其中完全一致 {n_iso_ok} 条（{n_iso_ok / max(len(iso_cmp), 1):.1%}）")
+    bad = iso_cmp[~iso_cmp["判定"].str.startswith(("一致", "缺值", "NUBASE"))]
+    print(f"  对不上的 {len(bad)} 条，前 8 条：")
+    print(bad.head(8).to_string(index=False))
     print("\n分歧最大 10 条：")
     print(out.head(10).to_string(index=False))
     print(f"\n-> {PROC / 'nubase_vs_wiki.csv'}")
