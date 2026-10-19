@@ -198,7 +198,9 @@ def score_row(row: dict) -> dict:
 
     qty = row.get("qty")
     if not isinstance(qty, str):
-        if frac is None or pd.isna(frac):
+        if z >= 104:
+            qty = "原子级"             # 超重元素：单原子合成，从来不是「可称量的物质」
+        elif frac is None or pd.isna(frac):
             qty = "微克级"
         elif frac > 0.01:
             qty = "吨级"

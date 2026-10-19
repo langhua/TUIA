@@ -247,12 +247,13 @@ def sheet_readme(wb: Workbook) -> None:
 
     last_row = 5 + len(rows)
     section(ws, last_row + 2, "二、三个必须先说清的口径", 5)
+    n_cur = int(pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig")["策展"].sum())
     notes = [
         "① 「可及性」≠「重要性」。它是采购难度，不是科学价值。半衰期只有几小时的核素往往评分很低，"
         "但它们恰恰是最有价值的诊疗核素——低分说明的是「你必须就在它旁边生产」，不是「它没用」。",
         "② 成本与量级是量级判断，不是报价。T0–T4 是数量级分层，用于横向比较；真实价格随反应堆档期、"
-        "合同规模、同位素纯度剧烈波动，可能相差 3–5 倍。",
-        "③ 「推定」与「策展」要分清。焦点目录里的 227 条是人工逐条读过路线与量级后写的；"
+        "合同规模、同位素纯度剧烈波动，可能相差 3–5 倍。铀那一段已用 EIA 成交价标定过（页 19）。",
+        f"③ 「推定」与「策展」要分清。焦点目录里的 {n_cur} 条是人工逐条读过路线与量级后写的；"
         "其余三千余条的可及性评分是由丰度与元素级工艺推出的估计值，只适合看趋势。",
     ]
     r = last_row + 3
@@ -287,6 +288,34 @@ def sheet_readme(wb: Workbook) -> None:
             elif i % 2 == 0:
                 cell.fill = PatternFill("solid", fgColor=CREAM)
         ws.row_dimensions[r + 2 + i].height = 26
+
+    # ---- 四、中英术语对照（便于英文引用与投稿）----
+    rt = r + 2 + len(GRADES) + 2
+    section(ws, rt, "四、中英术语对照", 5)
+    header_row(ws, rt + 1, ["#", "中文", "English · 说明", "首次出现"], [4, 22, 60, 34])
+    terms = [
+        ("可及性", "Accessibility — 采购/获得该核素的难易，0–100 分", "02、05"),
+        ("策展", "Curated — 人工逐条读过路线与量级后写入的值", "06"),
+        ("推定", "Estimated — 由丰度 + 元素级工艺按规则算出的值", "05"),
+        ("可得量级", "Supply scale — 全球年可供应量级（质量或活度）", "06、07"),
+        ("成本层级", "Cost tier (T0–T4) — 每克价格的数量级分层", "07、19"),
+        ("供应链成熟度", "Supply maturity — 是否商业化、有无稳定货期", "07"),
+        ("再生闭环", "Closed-loop regeneration — 消耗后能否回炉再生", "09"),
+        ("同质异能态", "Isomer / m-state — 激发态的长寿命核素", "14"),
+        ("发生器", "Generator — 母体衰变、现场洗脱子体", "16"),
+        ("谱平均截面", "Spectrum-averaged cross section", "18"),
+        ("共振自屏", "Resonance self-shielding（NR 近似）", "18"),
+    ]
+    for i, (cn, en, where) in enumerate(terms, start=1):
+        for j, v in enumerate((i, cn, en, where), start=1):
+            cell = ws.cell(row=rt + 1 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5, color=INK,
+                             bold=(j == 2))
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+        ws.row_dimensions[rt + 1 + i].height = 22
 
 
 def sheet_periodic_image(wb: Workbook) -> None:
@@ -344,6 +373,9 @@ def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
         cell.alignment = Alignment(horizontal="center")
 
     by_z = elems.set_index("Z")
+    # 哪些元素至少有 1 条人工策展记录 —— 用来画粗框（评审建议：一眼看出哪些经过了人工核定）
+    _nu = pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig")
+    curated_syms = set(_nu.loc[_nu["策展"].astype(bool), "sym"])
     for z, (col, row) in GRID.items():
         rec = by_z.loc[z]
         r = 3 + row
@@ -362,10 +394,10 @@ def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
             cell.value = f"{z}\n{rec['元素']}\n{rec['元素可及性评分']:.0f}"
         cell.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell.border = Border(left=Side(style="thin", color="FFFFFF"),
-                             right=Side(style="thin", color="FFFFFF"),
-                             top=Side(style="thin", color="FFFFFF"),
-                             bottom=Side(style="thin", color="FFFFFF"))
+        curated = rec["元素"] in curated_syms
+        edge = (Side(style="medium", color=NAVY) if curated
+                else Side(style="thin", color="FFFFFF"))
+        cell.border = Border(left=edge, right=edge, top=edge, bottom=edge)
         cell.font = Font(name="Calibri", size=9, color=GRADE_TEXT[g])
 
     for r in range(4, 14):
@@ -398,6 +430,10 @@ def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
              "需要低温蒸馏 CO 或离心，成本跳到 T3；而 N（氮）只有 51 分，是因为 N2 的 15N 富集级联更长。"
              "反过来 H（氢）拿到 80 分：D 可以靠化学交换吨级生产，但 T（氚）完全是另一条路——"
              "见 09_再生闭环。", 19)
+    note_row(ws, lr + 4,
+             "**粗框 = 该元素至少有 1 条人工策展记录**（共 "
+             f"{len(curated_syms)} 个元素、{int(_nu['策展'].astype(bool).sum())} 条核素）；"
+             "无粗框的元素，其分数完全由丰度与元素级工艺推定，只能看趋势。", 19)
 
 
 def sheet_elements(wb: Workbook, elems: pd.DataFrame) -> None:
@@ -459,6 +495,11 @@ def sheet_iptei(wb: Workbook, elems: pd.DataFrame, focus: pd.DataFrame) -> None:
              "IPTEI 原图用方块表示每种稳定/长寿命同位素的丰度与半衰期。本表保留这些量，"
              "并新增「最佳可及同位素 / 可及性评分 / 焦点应用」三列 —— 这样一眼能看出"
              "「这个元素的哪个同位素是真正能被工程使用的」。", 12)
+    note_row(ws, end + 3,
+             "**「稳定同位素」的计数口径**：只计无放射性衰变的核素。⁴⁰K、⁸⁷Rb、¹⁷⁶Lu、¹⁴⁷Sm、¹¹⁵In、"
+             "¹³⁸La 等「原生放射性」核素不计入本列，但它们在 05 表的「稳定性」列中标为「原生放射性」，"
+             "不是「稳定」—— 两边口径不同，不是矛盾。", 12, size=9.5)
+    ws.row_dimensions[end + 3].height = 34
 
 
 def sheet_nuclides(wb: Workbook, nuclides: pd.DataFrame) -> None:
@@ -486,6 +527,12 @@ def sheet_nuclides(wb: Workbook, nuclides: pd.DataFrame) -> None:
     note_row(ws, end + 2,
              "本表绝大多数核素没有人工策展，其可及性评分由「天然丰度 + 元素级主流工艺 + 推定成本层级」"
              "推出，属趋势性估计（「策展」列为否）。要做采购决策，请看 06_可及性目录。", 18)
+    note_row(ws, end + 3,
+             f"**收录口径**：本表 {len(nuclides):,} 条 = NIST Atomic Weights 表里的全部核素条目"
+             "（含天然丰度未知、以及尚未观测到但已给出评估质量者）。"
+             "NUBASE2020 另给出 5 843 条（含 2 285 条激发态，见页 14），"
+             "两份表的收录取舍不同，逐条差异见页 15。", 18, size=9.5)
+    ws.row_dimensions[end + 3].height = 30
 
 
 def sheet_focus(wb: Workbook, focus: pd.DataFrame) -> None:
@@ -609,6 +656,45 @@ def sheet_model(wb: Workbook) -> None:
              "C 35–50（稀缺/受限） · D 20–35（实验室级别） · E < 20（基本不可得）", 6,
              size=10, color=NAVY2)
 
+    # ---- 六、逐项算例（数值从数据现算，不写死）----
+    r4 = r3 + 3
+    section(ws, r4, "六、逐项算例：¹⁸O 为什么是 63.1 分（可自己照着复算）", 6)
+    note_row(ws, r4 + 1,
+             "拿本页的权重与映射表，对一个核素逐项算一遍。若你改了任何权重，下面的数会跟着变"
+             "（重跑 tools/build_dataset.py 后本页同步）。", 6, size=9)
+    _nu = pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig")
+    _row = _nu[_nu["isotope"] == "18O"].iloc[0]
+    subs = {code: float(_row[code]) for code, _, _ in WEIGHTS}
+    base = sum(w * subs[c] for c, _, w in WEIGHTS)
+    gate = min(subs[c] for c in ("A2", "A3", "A4", "A5", "A6", "A7"))
+    factor = 0.60 + 0.40 * gate / 100.0
+    total = round(base * factor, 1)
+
+    header_row(ws, r4 + 2, ["代号", "子维度", "权重 w", "得分 S", "w · S"],
+               [10, 24, 10, 14, 52])
+    names = {c: n for c, n, _ in WEIGHTS}
+    for i, (code, _, w) in enumerate(WEIGHTS):
+        vals = (code, names[code], w, round(subs[code], 1), round(w * subs[code], 2))
+        for j, v in enumerate(vals, start=1):
+            cell = ws.cell(row=r4 + 3 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5, color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(horizontal="center" if j != 2 else "left",
+                                       vertical="center")
+            if i % 2 == 1:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+    rn = r4 + 3 + len(WEIGHTS)
+    steps = [
+        f"① Base = Σ w·S = {base:.2f}",
+        f"② 短板 = min(A2…A7) = {gate:.0f}（这里是 A3 成本量级：¹⁸O 要走低温蒸馏或热扩散，T2）",
+        f"③ 折损系数 = 0.60 + 0.40 × {gate:.0f}/100 = {factor:.3f}",
+        f"④ TUIA = {base:.2f} × {factor:.3f} = **{total:.1f}** —— 与 05 表里的 "
+        f"{float(_row['可及性评分']):.1f} 分一致（差 {abs(total - float(_row['可及性评分'])):.1f}）",
+    ]
+    for i, t in enumerate(steps):
+        note_row(ws, rn + i, t, 6, size=9.5)
+        ws.row_dimensions[rn + i].height = 22
+
 
 def sheet_routes(wb: Workbook) -> None:
     ws = wb.create_sheet("08_生产路线图鉴")
@@ -616,44 +702,56 @@ def sheet_routes(wb: Workbook) -> None:
     rows = [
         ("气体离心", "挥发性化合物在高速离心场中按质量差逐级富集",
          "UF6、SiF4、GeF4、WF6、MoF6", "需要千级联，投资十亿量级", "3–18 个月",
-         "9", "级联投资与能耗；化合物必须易挥发", "Urenco、Rosatom、中核"),
+         "9", "级联投资与能耗；化合物必须易挥发",
+         "Urenco、Rosatom（ECP）、中核；全球 SWU ～5×10⁷/年，单厂 10⁶–10⁷/年"),
         ("低温蒸馏", "利用沸点差做低温精馏",
          "CO（13C/12C）、NO（15N）、He、Ne、Kr、Xe", "低温装置 + 高塔板数", "1–6 个月",
-         "9", "能耗与冷量；同系物沸点差极小", "ORNL、Cambridge Isotope、中科院"),
+         "9", "能耗与冷量；同系物沸点差极小",
+         "ORNL、Cambridge Isotope、中科院；单产品百公斤–吨/年"),
         ("化学交换", "利用同位素在两相间的平衡常数差",
          "D2O（Girdler 法）、6Li（COLEX 法）", "大流量塔器，化工级投资", "数周",
-         "9", "回流比大、停留时间长；但工艺简单可放大", "加拿大重水厂、中核"),
+         "9", "回流比大、停留时间长；但工艺简单可放大",
+         "加拿大重水厂（千吨 D2O/年）、中核"),
         ("离子交换色谱", "利用树脂上的同位素效应做置换色谱",
          "稀土（Gd-157、Yb-171/173、Lu-176）、Zn、Cd", "数百米柱长", "数周–数月",
-         "8", "分离系数极小、产率低、溶剂消耗大", "ORNL、Eckert & Ziegler"),
+         "8", "分离系数极小、产率低、溶剂消耗大",
+         "ORNL、Eckert & Ziegler；公斤–百公斤/年"),
         ("电磁分离（calutron）", "离子束在磁场中按质量分离",
          "Mg-26、Ca-48、Pt-195、多种稀土", "单一装置产能以毫克计",
-         "数周", "7", "产能极低、电耗巨大、维护昂贵", "ORNL（历史）、俄罗斯"),
+         "数周", "7", "产能极低、电耗巨大、维护昂贵",
+         "ORNL（历史）、俄罗斯；克–百克/年"),
         ("激光分离", "利用同位素位移选择性电离或解离",
          "Yb、Ca、Li、U（AVLIS 型）", "中等规模中试", "研发阶段",
-         "5–7", "激光器成本、选择性与通量的矛盾", "多家实验室"),
+         "5–7", "激光器成本、选择性与通量的矛盾",
+         "多家实验室；中试，公斤/年以下"),
         ("反应堆中子活化", "(n,γ)/(n,p)/(n,α) 反应",
          "Co-60、Ir-192、Mo-99、Lu-177、I-131、P-32", "研究堆 + 热室",
-         "1–6 个月（含冷却）", "9", "受研究堆档期与大修计划制约", "HFIR、BR-2、HFR、CARR"),
+         "1–6 个月（含冷却）", "9", "受研究堆档期与大修计划制约",
+         "HFIR、BR-2、HFR、CARR；单堆靶件千–万居/年"),
         ("裂变产物分离", "从乏燃料中提取特定裂变产物",
          "Mo-99、Cs-137、Sr-90、I-131、Ru-106", "后处理设施",
-         "依赖后处理排期", "9", "政治与核安保限制；设施稀缺", "La Hague、Mayak"),
+         "依赖后处理排期", "9", "政治与核安保限制；设施稀缺",
+         "La Hague、Mayak；千–万居/年，随后处理排期"),
         ("发生器洗脱", "母体衰变产生子体，现场洗脱",
          "99Mo/99mTc、68Ge/68Ga、90Sr/90Y、188W/188Re", "母体供应决定一切",
-         "母体 66 h – 271 d", "9", "母体产能是唯一瓶颈", "多家核药企业"),
+         "母体 66 h – 271 d", "9", "母体产能是唯一瓶颈",
+         "多家核药企业；单支发生器 10⁻²–1 居"),
         ("加速器合成", "质子/氘核/α 束打靶",
          "F-18、Ga-68、Zr-89、At-211、Ac-225（部分）", "回旋加速器 + 放射化学",
-         "数小时–数天", "8–9", "射程与靶材；短半衰期决定必须就近", "各地 PET 中心"),
+         "数小时–数天", "8–9", "射程与靶材；短半衰期决定必须就近",
+         "各地 PET 中心；单台回旋 10¹–10² 居/天"),
         ("散裂 / 在线同位素分离", "高能束打散裂靶，在线分离产物",
          "Ac-225、超重元素、丰中子束流", "大型散裂源", "按束流时间排期",
-         "6–7", "束流时间极稀缺；化学分离复杂", "TRIUMF、LANL、CERN-ISOLDE"),
+         "6–7", "束流时间极稀缺；化学分离复杂",
+         "TRIUMF、LANL、CERN-ISOLDE；毫居–居/年，超重元素为原子/年"),
         ("天然提取", "直接从矿石/卤水/空气中分离",
          "Li、B、He、Ne、Ar、Rb、U、Th、Ra", "矿业规模", "周–月",
-         "9", "资源分布与地缘政治", "各矿业公司"),
+         "9", "资源分布与地缘政治", 
+         "各矿业公司；吨–万吨/年"),
     ]
     df = pd.DataFrame(rows, columns=["路线", "原理", "代表核素", "规模门槛",
-                                     "典型周期", "TRL", "主要瓶颈", "代表设施"])
-    widths = [16, 30, 30, 22, 14, 6, 30, 22]
+                                     "典型周期", "TRL", "主要瓶颈", "代表设施与产能量级"])
+    widths = [16, 30, 30, 22, 14, 6, 30, 30]
     end = write_table(ws, df, 4, widths, wrap_cols=[2, 3, 4, 7, 8])
     ws.auto_filter.ref = f"A4:H{end}"
     ws.freeze_panes = "B5"
@@ -663,6 +761,9 @@ def sheet_routes(wb: Workbook) -> None:
              "TRL = 技术成熟度（1–9）。轨道的选择往往比核素本身更能决定价格："
              "同一个 99Mo，走反应堆 (n,γ) 路线比活度低两个数量级，但不需要后处理设施；"
              "走裂变分离路线比活度高，却被后处理能力卡死。", 8)
+    note_row(ws, end + 3,
+             "**「产能量级」是量级判断，不是逐厂核实的数据**：行业总量（如全球 SWU ～5×10⁷/年）可靠，"
+             "单厂数字随扩产频繁变动，用前请核当期年报。", 8, size=9)
 
 
 def sheet_loops(wb: Workbook) -> None:
@@ -890,13 +991,16 @@ def sheet_limits(wb: Workbook) -> None:
         note_row(ws, 5 + i, f"· {t}", 4, size=10)
 
     section(ws, 11, "不能做的（务必别误用）", 5)
+    n_cur = int(pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig")["策展"].astype(bool).sum())
     cannot = [
         "不能当报价单：成本层级是数量级，误差可以达到 ±1 个数量级。铀那一段已用成交价锤过"
         "（页 19），其余核素没有公开价，且价格本身就是逐年变的（天然铀 2003→2025 变了 5 倍）。",
         "不能当核数据表：质量（AME2020）、半衰期（已对账）、自旋与衰变分支（NUBASE）、"
         "2200 m/s 截面与共振积分（ENDF/B-VIII.0，35 个核素）都已是评估值；"
         "但分离能、衰变子体能级、能群结构的共振参数仍未接入；做计算前请以原件为准。",
-        "不能覆盖全部核素：约 3200 个核素的可及性评分是推定的，只有 227 条经过人工策展。",
+        f"不能覆盖全部核素：约 {3600 - n_cur} 个核素的可及性评分是推定的，只有 {n_cur} 条经过人工策展。",
+        "不能把总分当作真实可及性排序：加速器/反应堆产物受方法类别约束（加速器合成 A2=30、反应堆活化 A2=55），"
+        "所以 ¹⁸F（全球日产千居）仍然落在 D 级，与 ²²⁵Ac 同一档。读这类核素请看「可得量级」列，不要看总分。",
         "不能替代法规判断：管制负担只是相对分值，真实许可取决于国家法规与用途。",
         "不评价「该不该做」：本表只描述获得难度，不涉及伦理、扩散与出口管制合规。",
         "不是 IUPAC 官方发布物：IPTEI 只作为编排思路的参考，本工作簿与其中图形均独立绘制，"
@@ -935,6 +1039,24 @@ def sheet_limits(wb: Workbook) -> None:
             cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
             if i % 2 == 0:
                 cell.fill = PatternFill("solid", fgColor=CREAM)
+
+    # ---- 版权与引用 ----
+    rc = 27 + len(fields) + 2
+    section(ws, rc, "版权与引用", 5)
+    legal = [
+        "核数据来自公开评估与汇编：NIST Atomic Weights and Isotopic Compositions、"
+        "IAEA/AMDC 的 NUBASE2020 与 AME2020、NNDC 的 ENDF/B-VIII.0、U.S. EIA Form EIA-858；"
+        "逐字段的出处见 11_数据源，可逐条核。",
+        "本工作簿的文字、评分模型、图形与排版 © 作者 2026（v0.1）。"
+        "**可以自由引用其中的数据与结论并注明出处**；转发图形或整册时请保留本页与「非 IUPAC 官方发布物」声明。",
+        "本页与全部图形均为独立绘制 —— 未使用 IUPAC IPTEI 的任何原始文件（SVG/PDF/位图），"
+        "与 IUPAC 无隶属关系。",
+        "价格数据的时效：EIA 价格截至 2025 交付年度（2026-07 发布）；³H 价格是 2003 年文献值。"
+        "引用成本数字时请连同年份一起引。",
+    ]
+    for i, t in enumerate(legal, start=1):
+        note_row(ws, rc + i, f"· {t}", 5, size=9.5)
+        ws.row_dimensions[rc + i].height = 30
 
 
 def sheet_supply(wb: Workbook) -> None:
@@ -1318,7 +1440,7 @@ def sheet_prices(wb: Workbook) -> None:
     # ---- 二、燃料循环成交价 ----
     fu = pd.read_csv(PROC / "prices_fuelcycle.csv", encoding="utf-8-sig")
     r2 = end1 + 3
-    section(ws, r2, f"二、燃料循环成交价（EIA Form EIA-858，{int(fu['年份'].min())}–{int(fu['年份'].max())}，采购方申报）", 9)
+    section(ws, r2, f"二、燃料循环成交价（EIA Form EIA-858；数据截至 {int(fu['年份'].max())} 交付年度，2026-07 发布）", 9)
     show = fu[["年份", "U3O8e加权价_usd_per_lb", "U3O8e现货价_usd_per_lb",
                "U3O8e长协价_usd_per_lb", "U3O8e加权价_usd_per_kgU", "SWU价_usd_per_SWU"]].copy()
     show.columns = ["年份", "U3O8 加权 $/lb", "现货 $/lb", "长协 $/lb",
@@ -1386,7 +1508,7 @@ def sheet_prices(wb: Workbook) -> None:
         "③ 本表**没有**去改 ³H 的策展等级：证据只有二手一条（LANL 2003 报告经维基转述），"
         "而且方向是随时间上偏（聚变需求推高）。拿到当期报价后再决定改 T4，"
         "否则就是拿一条 20 多年前的二手数字去动全表的评分。",
-        "④ **一个锚点撑不起全表**：227 条策展里只有 4 条能对照（都是铀和氚）。"
+        "④ **一个锚点撑不起全表**：231 条策展里只有 4 条能对照（都是铀和氚）。"
         "其余核素的 T 值没有任何外部价格可核 —— 这正是第一条的结论在表内的体现。",
     ]
     for i, t in enumerate(bullets4, start=1):
@@ -1423,6 +1545,9 @@ def sheet_prices(wb: Workbook) -> None:
         "⑤ ²³⁵U 的「每克成本」是把整个 kgU 的全成本摊到 ²³⁵U 上，"
         "不是市场上有「每克 ²³⁵U」这个报价 —— 现实中高浓铀是按 U 计价的（且受管制）。",
         "⑥ 氚的价格是 2003 年文献值，且氚受出口管制、没有公开现货市场；本页只用它做量级校验。",
+        "⑦ **时效**：本页所有价格都带年份 —— 铀/浓缩是 EIA 的成交年度（目前到 2025 年，"
+        "2026-07 发布），³H 是 2003 年文献值。引用时请连同年份一起引；一年后数字过时是市场变了，"
+        "不是本表错了。",
     ]
     for i, t in enumerate(notes, start=1):
         note_row(ws, r6 + i, t, 9, size=9.5)
