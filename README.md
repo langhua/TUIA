@@ -86,7 +86,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia-heatmap.svg` / `.png` / `@2x.png` | 可及性热力格（与工作簿 `02b` 同构） |
 | `tuia-focus-bars.svg` | 焦点核素评分条形图 |
 
-### `dist/TUIA_同位素可及性全景扩展.xlsx`（18 个工作表）
+### `dist/TUIA_同位素可及性全景扩展.xlsx`（19 个工作表）
 
 | 工作表 | 内容 | 什么时候打开 |
 |---|---|---|
@@ -108,6 +108,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `14_同质异能态` | 2 050 条激发态（m-state）：激发能、半衰期、NUBASE 核对、按能级挂的说明 | 查 m 态 |
 | `15_NUBASE对账` | 基态与激发态的逐条核对：一致 / 有差异 / 显著分歧 / NUBASE 无此能级 | 验数据 |
 | `16_衰变链与发生器` | 由衰变分支算出的子体：36 对发生器候选 + 5 对异构体馈入 + 最长链 | 找发生器 |
+| `17_中子截面` | ENDF/B-VIII.0 的 2200 m/s 截面、共振积分，与 α / 转换比 / 嬗变时间 | 算中子账 |
 
 ### 中间数据（`data/processed/`）
 
@@ -125,6 +126,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `ame_vs_nist.csv` | 原子质量对账（2 537 条可比：1 348 完全一致 / 1 046 舍入级 / 143 显著差异） |
 | `decay_graph.csv` | 逐条衰变边（6 588 条：母体/模式/分支%/子体） |
 | `decay_chains.csv` | 每个核素的主导边、链长与「发生器候选」标记（36 对） |
+| `xs_thermal.csv` | 35 条 ENDF/B-VIII.0 截面：σ(0.0253 eV)、共振积分、共振峰 |
+| `xs_index.csv` | 由截面算出的 α、热谱转换比、嬗变时间、¹⁹⁷Au 校验 |
 | `nubase_vs_wiki.csv` | 基态半衰期逐条对账（3 099 条可比，2 932 条一致 = 94.6%） |
 | `nubase_vs_isomers.csv` | 激发态逐条对账（2 050 条：一致 1 823 / 差异 56 / NUBASE 无 35 / 缺值 104） |
 
@@ -185,6 +188,11 @@ python tools/qa_nubase.py            # 基态 + 激发态逐条对账
 python tools/qa_ame.py               # 原子质量对账（AME2020 vs NIST）
 python tools/decay_chains.py         # 衰变子体 → 衰变链与发生器
 
+# 3) 中子截面（可选，只做增殖/嬗变判断时需要）
+python tools/fetch_xs.py            # ENDF/B-VIII.0 逐点截面（JSON 镜像）
+python tools/parse_xs.py            # → σ(0.0253 eV)、共振积分
+python tools/xs_index.py            # → α / 转换比 / 嬗变时间
+
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
 python tools/render_png.py           # SVG -> PNG（工作簿内嵌用）
@@ -210,6 +218,7 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 | 半衰期 | Wikipedia「Isotopes of *X*」118 页 + **NUBASE2020 逐条核对**（基态 3 099 条可比、**94.6% 一致**；激发态 1 823/2 050） | 汇编 + 核对 |
 | 衰变模式与分支强度 | **NUBASE2020 的 BR 列**（含分支百分比，如 40K 的 β− 89.28% / β+ 10.72%） | 权威 |
 | 自旋 I（Jpi） | **NUBASE2020**（评估值）；NUBASE 未收录的核素才回落到维基 | 权威 |
+| 中子截面 | **ENDF/B-VIII.0**（NNDC，294 K）逐点截面；本仓取 30 个核素的 (n,γ)/(n,f)/(n,p)/(n,t)/(n,α) | 权威 |
 | 成本层级、可得量级、管制负担 | 本仓人工策展（`tools/curation.py`） | **量级估计**，非报价 |
 | 用途标签 | 人工策展 | 定性 |
 
@@ -288,6 +297,9 @@ TUIA/
    ├─ qa_nubase.py                # 与 NUBASE2020 对账（基态 + 激发态）
    ├─ qa_ame.py                   # 与 AME2020 对账（原子质量）
    ├─ decay_chains.py             # 衰变子体、链长、发生器
+   ├─ fetch_xs.py                 # ENDF/B-VIII.0 截面下载
+   ├─ parse_xs.py                 # σ(0.0253 eV)、共振积分
+   ├─ xs_index.py                 # α / 转换比 / 嬗变时间
    ├─ build_dataset.py            # 合并与评分
    ├─ extract_isomers.py          # 抽同质异能态（m-state）
    ├─ build_workbook.py           # 生成 xlsx

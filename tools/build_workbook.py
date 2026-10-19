@@ -231,6 +231,7 @@ def sheet_readme(wb: Workbook) -> None:
         ("14_同质异能态", "2050 条激发态：99mTc、229mTh、178m2Hf 都在这里", "查 m 态"),
         ("15_NUBASE对账", "与 IAEA/AMDC 评估表逐条比半衰期，标出分歧", "验数据"),
         ("16_衰变链与发生器", "由衰变分支算出的子体、长链，与可作发生器的母体-子体对", "找发生器"),
+        ("17_中子截面", "ENDF/B-VIII.0 的 2200 m/s 截面、共振积分，与增殖/嬗变指标", "算中子账"),
     ]
     header_row(ws, 5, ["#", "工作表", "内容", "什么时候打开"], [4, 22, 60, 34])
     for i, (a, b, c) in enumerate(rows, start=1):
@@ -727,7 +728,8 @@ def sheet_loops(wb: Workbook) -> None:
              7, size=10)
     note_row(ws, r + 3,
              "本页是人工策展的**工艺路线**（反应堆/加速器）；由核数据算出来的**衰变链与发生器**"
-             "（母体比子体长寿 10 倍以上的对）见 16_衰变链与发生器 —— 两者互补：一个有工程，一个有物理。",
+             "（母体比子体长寿 10 倍以上的对）见 16_衰变链与发生器 —— 两者互补：一个有工程，一个有物理。"
+             "这些路线能不能「闭合」到物理上成立，看的是中子账：见 17_中子截面。",
              7, size=9.5)
 
 
@@ -828,6 +830,9 @@ def sheet_sources(wb: Workbook) -> None:
         ("自旋 I（Jpi）", "**NUBASE2020**（评估值）",
          "IAEA AMDC，Chin. Phys. C 45, 030001 (2021)", "权威（评估表）",
          "NUBASE 未收录的核素才回落到维基；NUBASE 的 `#`（系统性估计）标记保留"),
+        ("中子截面", "**ENDF/B-VIII.0**（NNDC）",
+         "逐点截面 JSON 镜像；原始为 NNDC 评价文件，294 K", "权威（评价库）",
+         "只取了〔n,γ〕〔n,f〕〔n,p〕〔n,t〕〔n,α〕等反应道；单群 2200 m/s，见 17 页"),
         ("同位素纯度上限", "工艺经验值", "本工作簿 07_评分模型", "估计", "按工艺类别给出，非具体产品规格"),
         ("成本层级 T0–T4", "量级判断", "本工作簿 07_评分模型", "估计（±1 个数量级）",
          "不构成报价；真实价格随档期与合同波动"),
@@ -1111,6 +1116,72 @@ def sheet_chains(wb: Workbook) -> None:
         ws.row_dimensions[r3 + i].height = 32
 
 
+def sheet_xs(wb: Workbook) -> None:
+    """17_中子截面：ENDF/B-VIII.0 的 2200 m/s 截面与共振积分，以及由它算出的三个指标。"""
+    ws = wb.create_sheet("17_中子截面")
+    title_block(ws, "17 · 中子截面与增殖/嬗变指标",
+                "「能不能回炉」最终要落在中子账上：ENDF/B-VIII.0 的 2200 m/s 截面", 7)
+
+    xs = pd.read_csv(PROC / "xs_thermal.csv", encoding="utf-8-sig")
+    sec = xs[["核素", "反应道", "σ_热_barn", "共振积分_barn",
+              "共振峰截面_barn", "共振峰能量_eV", "数据点数"]].copy()
+    sec.columns = ["核素", "反应道", "σ (0.0253 eV) b", "共振积分 b",
+                   "共振峰 b", "共振峰能量 eV", "数据点数"]
+    section(ws, 4, f"一、逐核素截面（ENDF/B-VIII.0，294 K，{len(sec)} 条）", 7)
+    end = write_table(ws, sec, 5, [10, 12, 16, 12, 14, 14, 10],
+                      num_format={3: "0.000##", 4: "0.000##", 5: "0.00##",
+                                  6: "0.000##"})
+    for r in range(6, end + 1):
+        ws.row_dimensions[r].height = 18
+    ws.auto_filter.ref = f"A5:G{end}"
+    ws.freeze_panes = "C6"
+
+    # ---- 二、指标 ----
+    idx = pd.read_csv(PROC / "xs_index.csv", encoding="utf-8-sig")
+    r = end + 3
+    section(ws, r, "二、由截面推出的指标（单群、2200 m/s）", 7)
+    end2 = write_table(ws, idx, r + 1, [18, 18, 10, 78], wrap_cols=[4])
+    for rr in range(r + 2, end2 + 1):
+        ws.row_dimensions[rr].height = 24
+
+    # ---- 三、读法 ----
+    r2 = end2 + 3
+    section(ws, r2, "三、这几个数说明什么", 7)
+    bullets = [
+        "① **α = σγ/σf 越小，中子越省**：²³³U 只有 0.079，²³⁵U 0.169，²³⁹Pu 0.36、²⁴¹Pu 0.36 —— "
+        "钍铀循环的中子经济天然优于铀钚循环，这是它被反复提起的物理原因。",
+        "② **热谱做不到增殖**：单群转换比 ²³²Th→²³³U 只有 0.013、²³⁸U→²³⁹Pu 0.0026，都远小于 1。"
+        "增殖必须靠快谱 —— 这不是「再努力一点」能补上的差距，是能谱决定的。",
+        "③ **嬗变比等衰变快得多**：在 φ=3×10¹⁴ 下，⁹⁹Tc 只需 5.3 a、¹²⁹I 3.5 a，"
+        "而它们的半衰期是 10⁵–10⁷ a（快 10⁴–10⁶ 倍）。所以「烧掉长寿命裂变产物」在物理上成立，"
+        "瓶颈在分离、靶件与通量成本，不在核反应本身。",
+        "④ **氚增殖要避开硼**：⁶Li(n,t) 938 b，只有 ¹⁰B(n,α) 3844 b 的 24%。"
+        "同一包层里若有硼，中子会被它优先吃掉 —— 这是聚变包层材料的硬约束。",
+        "⑤ **管线本身是可信的**：用它算 ¹⁹⁷Au 的 2200 m/s 俘获截面得 98.68 b，"
+        "与手册值 98.65 b 差 0.03% —— 插值与积分没有系统性偏差。",
+    ]
+    for i, t in enumerate(bullets, start=1):
+        note_row(ws, r2 + i, t, 7, size=10)
+        ws.row_dimensions[r2 + i].height = 46
+
+    # ---- 四、口径 ----
+    r3 = r2 + len(bullets) + 2
+    section(ws, r3, "口径与局限（务必先读）", 7)
+    notes = [
+        "① 数据：ENDF/B-VIII.0（NNDC）逐点截面，294 K；JSON 转录取自 openmc-data-storage 镜像，"
+        "原始出处仍是 NNDC 发布的评价文件。",
+        "② σ(0.0253 eV) 是在 (ln E, ln σ) 上线性插值的：截面跨 3–6 个数量级，"
+        "线性能量插值会明显偏低。共振积分 ∫₀.₅eV^20MeV σ dE/E 同样在 ln 网格上积分，未做 1/v 扣除。",
+        "③ **单群、无共振自屏、无泄漏、无谱平均**。真实堆芯里 ²³²Th、²³⁸U 的共振自屏能把有效截面"
+        "压低一个数量级；转换比与嬗变时间都会随之改变。这里是「量级判断」，不是堆芯计算结果。",
+        "④ α 与转换比只在 2200 m/s 有意义；快谱要用谱平均截面，本页不给。",
+        "⑤ ¹⁹⁷Au 的校验见指标表最后一行；若替换数据源，请先跑这条校验再信其它数字。",
+    ]
+    for i, t in enumerate(notes, start=1):
+        note_row(ws, r3 + i, t, 7, size=9.5)
+        ws.row_dimensions[r3 + i].height = 36
+
+
 def sheet_nubase_qa(wb: Workbook) -> None:
     """15_数据对账：把现有（维基来源）基态数据与 NUBASE2020 逐条比半衰期。"""
     ws = wb.create_sheet("15_NUBASE对账")
@@ -1262,6 +1333,7 @@ def main() -> None:
     sheet_isomers(wb)
     sheet_nubase_qa(wb)
     sheet_chains(wb)
+    sheet_xs(wb)
 
     for ws in wb.worksheets:
         ws.sheet_properties.tabColor = NAVY
