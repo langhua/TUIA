@@ -86,7 +86,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia-heatmap.svg` / `.png` / `@2x.png` | 可及性热力格（与工作簿 `02b` 同构） |
 | `tuia-focus-bars.svg` | 焦点核素评分条形图 |
 
-### `dist/TUIA_同位素可及性全景扩展.xlsx`（19 个工作表）
+### `dist/TUIA_同位素可及性全景扩展.xlsx`（20 个工作表）
 
 | 工作表 | 内容 | 什么时候打开 |
 |---|---|---|
@@ -109,6 +109,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `15_NUBASE对账` | 基态与激发态的逐条核对：一致 / 有差异 / 显著分歧 / NUBASE 无此能级 | 验数据 |
 | `16_衰变链与发生器` | 由衰变分支算出的子体：36 对发生器候选 + 5 对异构体馈入 + 最长链 | 找发生器 |
 | `17_中子截面` | ENDF/B-VIII.0 的 2200 m/s 截面、共振积分，与 α / 转换比 / 嬗变时间 | 算中子账 |
+| `18_谱平均与自屏` | 六个谱下的平均截面、截面比随谱硬度的变化、NR 自屏 f 因子 | 看谱形影响 |
 
 ### 中间数据（`data/processed/`）
 
@@ -128,6 +129,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `decay_chains.csv` | 每个核素的主导边、链长与「发生器候选」标记（36 对） |
 | `xs_thermal.csv` | 35 条 ENDF/B-VIII.0 截面：σ(0.0253 eV)、共振积分、共振峰 |
 | `xs_index.csv` | 由截面算出的 α、热谱转换比、嬗变时间、¹⁹⁷Au 校验 |
+| `xs_spec.csv` | 6 个谱下的谱平均截面（19 行 × 6 谱） |
+| `xs_shield.csv` | NR 自屏后的有效俘获截面与 f 因子（4 个核素 × 6 个 σb） |
 | `nubase_vs_wiki.csv` | 基态半衰期逐条对账（3 099 条可比，2 932 条一致 = 94.6%） |
 | `nubase_vs_isomers.csv` | 激发态逐条对账（2 050 条：一致 1 823 / 差异 56 / NUBASE 无 35 / 缺值 104） |
 
@@ -192,6 +195,7 @@ python tools/decay_chains.py         # 衰变子体 → 衰变链与发生器
 python tools/fetch_xs.py            # ENDF/B-VIII.0 逐点截面（JSON 镜像）
 python tools/parse_xs.py            # → σ(0.0253 eV)、共振积分
 python tools/xs_index.py            # → α / 转换比 / 嬗变时间
+python tools/xs_spectrum.py         # → 谱平均截面 / 自屏 f 因子
 
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
@@ -300,6 +304,7 @@ TUIA/
    ├─ fetch_xs.py                 # ENDF/B-VIII.0 截面下载
    ├─ parse_xs.py                 # σ(0.0253 eV)、共振积分
    ├─ xs_index.py                 # α / 转换比 / 嬗变时间
+   ├─ xs_spectrum.py              # 谱平均截面 / 共振自屏
    ├─ build_dataset.py            # 合并与评分
    ├─ extract_isomers.py          # 抽同质异能态（m-state）
    ├─ build_workbook.py           # 生成 xlsx

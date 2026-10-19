@@ -232,6 +232,7 @@ def sheet_readme(wb: Workbook) -> None:
         ("15_NUBASE对账", "与 IAEA/AMDC 评估表逐条比半衰期，标出分歧", "验数据"),
         ("16_衰变链与发生器", "由衰变分支算出的子体、长链，与可作发生器的母体-子体对", "找发生器"),
         ("17_中子截面", "ENDF/B-VIII.0 的 2200 m/s 截面、共振积分，与增殖/嬗变指标", "算中子账"),
+        ("18_谱平均与自屏", "换到快谱怎么变、进堆芯还要过一遍共振自屏", "看谱形影响"),
     ]
     header_row(ws, 5, ["#", "工作表", "内容", "什么时候打开"], [4, 22, 60, 34])
     for i, (a, b, c) in enumerate(rows, start=1):
@@ -1150,8 +1151,10 @@ def sheet_xs(wb: Workbook) -> None:
     bullets = [
         "① **α = σγ/σf 越小，中子越省**：²³³U 只有 0.079，²³⁵U 0.169，²³⁹Pu 0.36、²⁴¹Pu 0.36 —— "
         "钍铀循环的中子经济天然优于铀钚循环，这是它被反复提起的物理原因。",
-        "② **热谱做不到增殖**：单群转换比 ²³²Th→²³³U 只有 0.013、²³⁸U→²³⁹Pu 0.0026，都远小于 1。"
-        "增殖必须靠快谱 —— 这不是「再努力一点」能补上的差距，是能谱决定的。",
+        "② **热谱做不到增殖**：单群截面比 ²³²Th→²³³U 只有 0.013、²³⁸U→²³⁹Pu 0.0026，都远小于 1。"
+        "增殖必须靠快谱 —— 这不是「再努力一点」能补上的差距，是能谱决定的。"
+        "（注：这是**单位原子数**下的比值；真实转换比要再乘富集/浓度比，"
+        "快谱下的变化见 18_谱平均与自屏。）",
         "③ **嬗变比等衰变快得多**：在 φ=3×10¹⁴ 下，⁹⁹Tc 只需 5.3 a、¹²⁹I 3.5 a，"
         "而它们的半衰期是 10⁵–10⁷ a（快 10⁴–10⁶ 倍）。所以「烧掉长寿命裂变产物」在物理上成立，"
         "瓶颈在分离、靶件与通量成本，不在核反应本身。",
@@ -1180,6 +1183,112 @@ def sheet_xs(wb: Workbook) -> None:
     for i, t in enumerate(notes, start=1):
         note_row(ws, r3 + i, t, 7, size=9.5)
         ws.row_dimensions[r3 + i].height = 36
+
+
+def sheet_spectrum(wb: Workbook) -> None:
+    """18_谱平均与自屏：谱平均截面、截面比随谱硬度的变化、NR 自屏因子。"""
+    ws = wb.create_sheet("18_谱平均与自屏")
+    title_block(ws, "18 · 谱平均截面与共振自屏",
+                "热谱那几个数是 2200 m/s 的点值；换到快谱要按谱加权，换到堆芯还要过一遍自屏", 8)
+
+    spec = pd.read_csv(PROC / "xs_spec.csv", encoding="utf-8-sig")
+    piv = spec.pivot_table(index=["核素", "反应道"], columns="谱",
+                           values="σ̄_barn", aggfunc="first")
+    order = ["热 Maxwell 300 K", "Watt 裂变谱（硬）", "软化快谱 kT=50 keV",
+             "软化快谱 kT=100 keV", "软化快谱 kT=200 keV", "软化快谱 kT=400 keV"]
+    piv = piv[[c for c in order if c in piv.columns]]
+    piv = piv.reset_index()
+    piv.columns = ["核素", "反应道", "热谱 300 K", "Watt 裂变谱", "软化 50 keV",
+                   "软化 100 keV", "软化 200 keV", "软化 400 keV"]
+    piv = piv.sort_values(["核素", "反应道"])
+    section(ws, 4, f"一、谱平均截面 σ̄（barn，{len(piv)} 行）", 8)
+    note_row(ws, 5, "「软化快谱 kT=…」是 **Maxwell 形 + 10 keV 以下截止** 的示意谱："
+                    "不截止的话，它的低能尾巴会吃进 ²³⁸U 在 1–10 keV 的巨大共振，"
+                    "把截面比虚假压低到 1/6。这是示意谱，不是任何真实堆芯的谱。", 8, size=9)
+    end = write_table(ws, piv, 6, [10, 8, 14, 14, 12, 12, 12, 12],
+                      num_format={3: "0.000##", 4: "0.000##", 5: "0.000##",
+                                  6: "0.000##", 7: "0.000##", 8: "0.000##"})
+    for r in range(7, end + 1):
+        ws.row_dimensions[r].height = 17
+    ws.freeze_panes = "C7"
+
+    # ---- 二、截面比随谱变化 ----
+    def pick(name, kind, sname):
+        r = spec[(spec["核素"] == name) & (spec["反应道"] == kind)
+                 & (spec["谱"] == sname)]
+        return float(r["σ̄_barn"].iloc[0]) if len(r) else None
+
+    r2 = end + 3
+    section(ws, r2, "二、单位原子数下的转换倾向  σc(增殖核) / [σf+σγ](裂变核)", 8)
+    note_row(ws, r2 + 1, "**这不是增殖比**。真实转换比 CR = 这个比值 × (N_增殖核/N_裂变核)；"
+                         "快堆里 ²³⁸U 的原子数是 ²³⁹Pu 的 5–10 倍，乘上去才接近 1。", 8, size=9)
+    rows = []
+    for sname in order:
+        if sname not in spec["谱"].values:
+            continue
+        line = {"谱": sname}
+        for fertile, fissile, key in (("232Th", "233U", "²³²Th→²³³U"),
+                                      ("238U", "239Pu", "²³⁸U→²³⁹Pu")):
+            sc = pick(fertile, "σγ", sname)
+            sf, sg = pick(fissile, "σf", sname), pick(fissile, "σγ", sname)
+            line[key] = round(sc / (sf + sg), 4) if (sc and sf and sg) else None
+        rows.append(line)
+    end2 = write_table(ws, pd.DataFrame(rows), r2 + 2, [22, 16, 16])
+
+    # ---- 三、自屏 ----
+    r3 = end2 + 3
+    section(ws, r3, "三、共振自屏（窄共振近似 NR）", 8)
+    sh = pd.read_csv(PROC / "xs_shield.csv", encoding="utf-8-sig")
+    wide = sh.pivot_table(index="核素", columns="背景截面σb_b",
+                          values="f", aggfunc="first").reset_index()
+    cols = ["核素", 1e6, 1000.0, 100.0, 50.0, 20.0, 10.0]
+    wide = wide[[c for c in cols if c in wide.columns]]
+    wide.columns = ["核素", "σb=10⁶", "σb=1000", "σb=100", "σb=50", "σb=20", "σb=10"]
+    end3 = write_table(ws, wide, r3 + 1, [10, 12, 12, 12, 12, 12, 12],
+                       num_format={2: "1.000", 3: "0.000", 4: "0.000",
+                                   5: "0.000", 6: "0.000", 7: "0.000"})
+
+    # ---- 四、读法 ----
+    r4 = end3 + 3
+    section(ws, r4, "四、这几个数说明什么", 8)
+    bullets = [
+        "① **谱越硬，俘获越吃不开**：²³⁸U→²³⁹Pu 的截面比从热谱 0.0024 → 软化 50 keV 的 0.131，"
+        "差 55 倍；Watt 裂变谱（更硬）又回落到 0.038。所以「快谱能不能增殖」不是一个是非题，"
+        "而是**谱形决定**的量。",
+        "② **单群截面比永远小于 1**，这不是结论性的否定：真实转换比 = 截面比 × 浓度比，"
+        "快堆用大量贫铀把 N₂₈/N₄₉ 堆到 5–10 倍，乘起来才接近 1。任何说「快谱自动增殖」的说法"
+        "都跳过了这一步。",
+        "③ **自屏能改一个数量级**：²³⁸U 的俘获在 σb=50 b（压水堆栅格量级）时只剩无限稀释值的 "
+        "7.4%，²⁴⁰Pu 在 σb=10 b 时只剩 0.6%（它那个 1.06 eV 共振太强）。"
+        "所以拿「无限稀释」的截面去算热谱转换比，会高估一个量级。",
+        "④ **²³⁹Pu 的自屏温和得多**（f≈0.2–0.7），因为它的共振又宽又矮、不像 ²³⁸U 那样尖。"
+        "这也解释了为什么 MOX 燃料的 Doppler 系数主要由 ²³⁸U/²⁴⁰Pu 决定。",
+    ]
+    for i, t in enumerate(bullets, start=1):
+        note_row(ws, r4 + i, t, 8, size=10)
+        ws.row_dimensions[r4 + i].height = 44
+
+    # ---- 五、口径 ----
+    r5 = r4 + len(bullets) + 2
+    section(ws, r5, "口径与局限", 8)
+    notes = [
+        "① 谱平均 σ̄ = ∫σ·χ dE / ∫χ dE，梯形积分；χ 为 Maxwell 形（E·exp(-E/kT)）或 "
+        "Watt 裂变谱（²³⁵U 热裂变，a=0.988 MeV、b=2.249 MeV⁻¹）。",
+        "② **热谱谱平均值 ≠ 2200 m/s 点值**：1/v 情形下 300 K Maxwell 平均约为点值的 0.886 倍"
+        "（√π/2），本表 ²³⁵U 的 σf 谱平均 503 b 对点值 587 b、²³⁹Pu 692 b 对 747 b，就是这个原因。"
+        "两页数字不同不是矛盾，是两个不同的量。",
+        "③ 自屏表的 f 归一化到 σb = 10⁹ b（完全稀释）；σb = 10⁶ 那列并不恰好等于 1 —— "
+        "对 ²⁴⁰Pu（峰值 ~10⁵ b）仍有 7% 自屏，这本身就是一个可检验的物理结果。",
+        "④ 自屏用**窄共振近似**：φ(E) ∝ 1/[σb+σt(E)]，σt 取 MT=2+102+18 之和，"
+        "积分域 0.5 eV–100 keV，结果是在该域上按 1/E 权重的平均俘获截面。",
+        "⑤ **没有做**：能群结构、Dancoff 因子（燃料棒互屏）、温度多普勒展宽、输运与泄漏。"
+        "真实的共振自屏因子要用 NJOY/OpenMC 这类程序算，本页只给出量级与趋势。",
+        "⑥ σb 的定义是「除该核素自身以外的宏观截面 / 该核素数密度」，本页直接给数值，"
+        "不替你换算成具体栅格 —— 因为那需要几何与成分。",
+    ]
+    for i, t in enumerate(notes, start=1):
+        note_row(ws, r5 + i, t, 8, size=9.5)
+        ws.row_dimensions[r5 + i].height = 32
 
 
 def sheet_nubase_qa(wb: Workbook) -> None:
@@ -1334,6 +1443,7 @@ def main() -> None:
     sheet_nubase_qa(wb)
     sheet_chains(wb)
     sheet_xs(wb)
+    sheet_spectrum(wb)
 
     for ws in wb.worksheets:
         ws.sheet_properties.tabColor = NAVY
