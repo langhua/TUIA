@@ -459,28 +459,29 @@ def sheet_iptei(wb: Workbook, elems: pd.DataFrame, focus: pd.DataFrame) -> None:
 
 def sheet_nuclides(wb: Workbook, nuclides: pd.DataFrame) -> None:
     ws = wb.create_sheet("05_同位素全景")
-    title_block(ws, "05 · 同位素全景", f"{len(nuclides):,} 个已知核素（NIST + Wikipedia 汇编）", 16)
-    cols = ["z", "sym", "isotope", "A", "N", "天然丰度%", "mass_u", "半衰期",
-            "half_life_s", "decay_modes", "自旋", "稳定性", "可及性评分", "可及性等级",
-            "工艺类别", "可得量级", "策展"]
+    title_block(ws, "05 · 同位素全景",
+                f"{len(nuclides):,} 个已知核素（质量 AME2020；半衰期/自旋/衰变 NUBASE2020 + Wikipedia）", 18)
+    cols = ["z", "sym", "isotope", "A", "N", "天然丰度%", "mass_u", "质量过剩_keV",
+            "半衰期", "half_life_s", "decay_modes", "自旋", "稳定性",
+            "可及性评分", "可及性等级", "工艺类别", "可得量级", "策展"]
     df = nuclides[cols].copy()
-    df.columns = ["Z", "元素", "同位素", "A", "N", "天然丰度%", "原子质量 u", "半衰期",
-                  "半衰期(秒)", "衰变模式", "自旋 I", "稳定性", "可及性评分", "等级",
-                  "工艺类别", "可得量级", "策展"]
-    widths = [5, 6, 9, 5, 5, 11, 14, 16, 12, 20, 16, 12, 10, 6, 13, 10, 6]
-    end = write_table(ws, df, 4, widths, score_cols=[13],
-                      num_format={7: "0.000####", 8: "0.000000", 9: "0.000E+00"})
+    df.columns = ["Z", "元素", "同位素", "A", "N", "天然丰度%", "原子质量 u",
+                  "质量过剩 keV", "半衰期", "半衰期(秒)", "衰变模式", "自旋 I",
+                  "稳定性", "可及性评分", "等级", "工艺类别", "可得量级", "策展"]
+    widths = [5, 6, 9, 5, 5, 11, 14, 12, 16, 12, 26, 16, 12, 10, 6, 13, 10, 6]
+    end = write_table(ws, df, 4, widths, score_cols=[14],
+                      num_format={7: "0.000####", 8: "0.0", 10: "0.000E+00"})
     for r in range(5, end + 1):
-        g = ws.cell(row=r, column=14).value
+        g = ws.cell(row=r, column=15).value
         if g in GRADE_FILL:
-            c = ws.cell(row=r, column=13)
+            c = ws.cell(row=r, column=14)
             c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
             c.font = Font(name="微软雅黑", size=8.5, bold=True, color=GRADE_TEXT[g])
-    ws.auto_filter.ref = f"A4:Q{end}"
+    ws.auto_filter.ref = f"A4:R{end}"
     ws.freeze_panes = "D5"
     note_row(ws, end + 2,
              "本表绝大多数核素没有人工策展，其可及性评分由「天然丰度 + 元素级主流工艺 + 推定成本层级」"
-             "推出，属趋势性估计（「策展」列为否）。要做采购决策，请看 06_可及性目录。", 16)
+             "推出，属趋势性估计（「策展」列为否）。要做采购决策，请看 06_可及性目录。", 18)
 
 
 def sheet_focus(wb: Workbook, focus: pd.DataFrame) -> None:
@@ -807,14 +808,18 @@ def sheet_sources(wb: Workbook) -> None:
     rows = [
         ("原子序数 / 元素符号 / 名称", "NIST + 人工整理", "NIST Atomic Weights and Isotopic Compositions",
          "权威", "118 元素全覆盖"),
-        ("质量数 A、原子质量", "NIST（AME2020 汇编）",
-         "physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?isotype=all", "权威",
-         "3352 条记录，含放射性核素"),
+        ("质量数 A、原子质量", "**AME2020**（直接读评估表原文件）",
+         "IAEA AMDC mass_1.mas20.txt；Chin. Phys. C 45, 030002/030003 (2021)", "权威",
+         "2 550 条；与 NIST 转发值为 143 个核素差异超过 1e-4 u（3 页附对账）"),
+        ("质量过剩 / 每核子结合能", "**AME2020**", "同上", "权威", "表中以前没有这两列"),
         ("天然丰度", "NIST Isotopic Composition",
          "同上", "权威", "288 个核素有丰度值（稳定 + 原生放射性）"),
-        ("半衰期 / 衰变模式", "Wikipedia「Isotopes of <element>」＋ **NUBASE2020 逐条核对**",
-         "en.wikipedia.org/wiki/Isotopes_of_<element>；IAEA AMDC nubase_4.mas20.txt",
-         "汇编 + 评估值核对", "3494 个核素；基态 3099 条可比，94.6% 一致，分歧见 15 页"),
+        ("半衰期", "Wikipedia「Isotopes of <element>」＋ **NUBASE2020 逐条核对**",
+         "en.wikipedia.org/wiki/Isotopes_of_<element>；nubase_4.mas20.txt",
+         "汇编 + 评估值核对", "基态 3 099 条可比、94.6% 一致；激发态 1 823/2 050 一致（见 15 页）"),
+        ("衰变模式与分支强度", "**NUBASE2020**（BR 列）",
+         "IAEA AMDC nubase_4.mas20.txt", "权威（评估表）",
+         "含分支百分比（如 40K 的 β− 89.28% / β+ 10.72%）；IS（丰度）不计入衰变模式"),
         ("自旋 I（Jpi）", "**NUBASE2020**（评估值）",
          "IAEA AMDC，Chin. Phys. C 45, 030001 (2021)", "权威（评估表）",
          "NUBASE 未收录的核素才回落到维基；NUBASE 的 `#`（系统性估计）标记保留"),
@@ -842,10 +847,9 @@ def sheet_sources(wb: Workbook) -> None:
     r = end + 2
     section(ws, r, "如果要做到「可发布级」精度，下一步应该接这些源", 5)
     up = [
-        "NUBASE2020 全表 — 已接入：半衰期已逐条对账（15 页），自旋已换成评估值",
-        "AME2020 质量表 — 已下载，尚未替换表里的 NIST 原子量",
-        "衰变分支与强度（NUBASE 的 BR 列）— 已解析出来，尚未替换 05 页的衰变模式",
-        "ENDF/B-VIII.0 或 JENDL-5（中子截面与反应道，做「再生闭环」定量必须有）",
+        "NUBASE2020 全表 — 已接入：半衰期已逐条对账（15 页），自旋与衰变分支已换成评估值",
+        "AME2020 质量表 — 已接入：原子质量、质量过剩、每核子结合能（2 550 条）",
+        "ENDF/B-VIII.0 或 JENDL-5（中子截面、分离能、反应道）— 做「再生闭环」定量必须有，尚未接入",
         "IAEA 同位素价格与产能调查（成本层级从估计升级为实测）",
         "IUPAC IPTEI 官方图表（仅作版式参考；本工作簿与其中图形均独立绘制）",
     ]
@@ -872,8 +876,8 @@ def sheet_limits(wb: Workbook) -> None:
     section(ws, 11, "不能做的（务必别误用）", 5)
     cannot = [
         "不能当报价单：成本层级是数量级，误差可以达到 ±1 个数量级，且不随时间更新。",
-        "不能当核数据表：半衰期已对过 NUBASE2020、自旋已换成 NUBASE，但质量、衰变分支、"
-        "中子截面仍未对齐评估表；做计算前请以 NUBASE2020 / AME2020 / ENDF 原件为准。",
+        "不能当核数据表：质量（AME2020）、半衰期（已对账）、自旋与衰变分支（NUBASE）都已是评估值，"
+        "但中子截面、衰变子体能级、分离能仍未接入；做计算前请以 NUBASE2020 / AME2020 / ENDF 原件为准。",
         "不能覆盖全部核素：约 3200 个核素的可及性评分是推定的，只有 227 条经过人工策展。",
         "不能替代法规判断：管制负担只是相对分值，真实许可取决于国家法规与用途。",
         "不评价「该不该做」：本表只描述获得难度，不涉及伦理、扩散与出口管制合规。",
@@ -1105,6 +1109,29 @@ def sheet_nubase_qa(wb: Workbook) -> None:
                 cell.fill = PatternFill("solid", fgColor=CREAM)
 
     r = rs + len(iso_stats) + 3
+    section(ws, r, "三、原子质量对账（AME2020 原表 vs NIST 转发值）", 10)
+    ame = pd.read_csv(PROC / "ame_vs_nist.csv")
+    vca = ame["判定"].value_counts()
+    ame_stats = [
+        ("可比条数", f"{len(ame)}", "NIST 与 AME2020 都收录的核素"),
+        ("完全一致", f"{int(vca.get('一致', 0))}", "差 = 0 u"),
+        ("舍入级差异", f"{int(vca.get('舍入级差异', 0))}", "相差 1e-6 u 以内，即 NIST 只保留 6 位小数"),
+        ("显著差异（>1e-4 u）", f"{int(vca.get('显著差异', 0))}",
+         "最大 2.86e-3 u（21B，约 2.7 MeV）—— NIST 那一份对中子滴附近的核素已经过时"),
+        ("差额中位数 / 最大值", f"{ame['差_u'].abs().median():.1e} u / {ame['差_u'].abs().max():.2e} u",
+         "1 u = 931 494.10242 keV"),
+    ]
+    header_row(ws, r + 1, ["指标", "数值", "说明"], [30, 22, 78])
+    for i, (k, v, note) in enumerate(ame_stats, start=1):
+        for j, val in enumerate((k, v, note), start=1):
+            cell = ws.cell(row=r + 1 + i, column=j, value=val)
+            cell.font = Font(name="微软雅黑", size=9.5, bold=(j == 1), color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+
+    r = r + len(ame_stats) + 3
     section(ws, r, "口径", 10)
     notes = [
         "① 基态按 (Z, A) 直接连；激发态按能级编号配对（维基 m/m1/m2 ↔ NUBASE idx 1/2/3），"
@@ -1113,8 +1140,8 @@ def sheet_nubase_qa(wb: Workbook) -> None:
         "③ 用比值而不是差：半衰期跨 30 个数量级，只有比值才有可比性。",
         "④ 显著分歧里有相当一部分是 NUBASE 的「系统性估计」（文件名里带 # 的数），"
         "这类值本就只是量级参考，不能当成测量值。",
-        "⑤ 本表核对的是半衰期；自旋已改用 NUBASE 的 Jpi（见 05_同位素全景），"
-        "质量与衰变分支尚未逐条比对。",
+        "⑤ 05_同位素全景 里已换成评估值的有：自旋（NUBASE Jpi）、衰变模式与分支（NUBASE BR）、"
+        "原子质量与质量过剩（AME2020）；只剩 NUBASE 未收录的那几十个核素仍为维基口径。",
     ]
     for i, t in enumerate(notes, start=1):
         note_row(ws, r + i, t, 10, size=9.5)

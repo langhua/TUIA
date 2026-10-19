@@ -120,6 +120,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia_supply.csv` | 59 个元素的分离产业国与置信度 |
 | `tuia_isomers.csv` | 2 050 条同质异能态（104 元素）：半衰期、衰变模式、自旋 |
 | `nubase2020.csv` | NUBASE2020 全表解析（5 843 条：3 558 基态 + 2 285 非基态，含激发能与 Jpi） |
+| `ame2020.csv` | AME2020 原子质量表解析（2 550 条：质量过剩、每核子结合能、原子质量） |
+| `ame_vs_nist.csv` | 原子质量对账（2 537 条可比：1 348 完全一致 / 1 046 舍入级 / 143 显著差异） |
 | `nubase_vs_wiki.csv` | 基态半衰期逐条对账（3 099 条可比，2 932 条一致 = 94.6%） |
 | `nubase_vs_isomers.csv` | 激发态逐条对账（2 050 条：一致 1 823 / 差异 56 / NUBASE 无 35 / 缺值 104） |
 
@@ -171,11 +173,13 @@ python tools/fetch_nist.py          # NIST 全核素质量与丰度
 python tools/fetch_wiki.py all      # 逐元素同位素表（半衰期/衰变/自旋）
 python tools/fetch_nubase.py        # NUBASE2020 / AME2020 原始表（IAEA AMDC）
 python tools/parse_nubase.py         # NUBASE -> 结构化 CSV（下面 build_dataset 要用它的自旋）
+python tools/parse_ame.py            # AME2020 -> 结构化 CSV（质量、质量过剩、结合能）
 
 # 2) 合并 + 评分
 python tools/build_dataset.py
 python tools/extract_isomers.py      # 同质异能态（m-state）单表
 python tools/qa_nubase.py            # 基态 + 激发态逐条对账
+python tools/qa_ame.py               # 原子质量对账（AME2020 vs NIST）
 
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
@@ -196,10 +200,11 @@ python tools/build_workbook.py       # -> dist/TUIA_同位素可及性全景扩�
 
 | 字段 | 来源 | 置信度 |
 |---|---|---|
-| 原子序数、符号、质量数、原子质量 | NIST *Atomic Weights and Isotopic Compositions*（AME2020 汇编） | 权威 |
+| 原子序数、符号、质量数 | NIST *Atomic Weights and Isotopic Compositions* | 权威 |
+| 原子质量、质量过剩、每核子结合能 | **AME2020 原表**（`mass_1.mas20.txt`）；2 550 条，与 NIST 转发值有 143 个核素差超过 1e-4 u | 权威 |
 | 天然丰度 | 同上 | 权威 |
-| 半衰期、衰变模式、子体 | Wikipedia「Isotopes of *X*」，逐元素 118 页 | 汇编 |
-| 半衰期核对 | **NUBASE2020**（IAEA AMDC，Chin. Phys. C 45, 030001）：基态 3 099 条可比，**94.6% 一致**；激发态 1 823/2 050（88.9%）与同能级一致 | 权威（评估表） |
+| 半衰期 | Wikipedia「Isotopes of *X*」118 页 + **NUBASE2020 逐条核对**（基态 3 099 条可比、**94.6% 一致**；激发态 1 823/2 050） | 汇编 + 核对 |
+| 衰变模式与分支强度 | **NUBASE2020 的 BR 列**（含分支百分比，如 40K 的 β− 89.28% / β+ 10.72%） | 权威 |
 | 自旋 I（Jpi） | **NUBASE2020**（评估值）；NUBASE 未收录的核素才回落到维基 | 权威 |
 | 成本层级、可得量级、管制负担 | 本仓人工策展（`tools/curation.py`） | **量级估计**，非报价 |
 | 用途标签 | 人工策展 | 定性 |
@@ -275,7 +280,9 @@ TUIA/
    ├─ fetch_wiki.py
    ├─ fetch_nubase.py             # NUBASE2020 / AME2020 原始表
    ├─ parse_nubase.py             # NUBASE 固定宽格式解析
-   ├─ qa_nubase.py                # 与 NUBASE2020 对账
+   ├─ parse_ame.py                # AME2020 固定宽格式解析
+   ├─ qa_nubase.py                # 与 NUBASE2020 对账（基态 + 激发态）
+   ├─ qa_ame.py                   # 与 AME2020 对账（原子质量）
    ├─ build_dataset.py            # 合并与评分
    ├─ extract_isomers.py          # 抽同质异能态（m-state）
    ├─ build_workbook.py           # 生成 xlsx

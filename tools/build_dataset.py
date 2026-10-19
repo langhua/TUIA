@@ -59,6 +59,79 @@ def load_nubase_jpi() -> dict[tuple[int, int], str]:
             for z, a, j in zip(gs["z"], gs["A"], gs["Jpi"])}
 
 
+# NUBASE 的衰变模式代码 -> 表里的写法
+DECAY_MAP = {
+    "B-": "β−", "B+": "β+", "B": "β", "EC": "EC", "EC+B+": "EC+β+",
+    "A": "α", "IT": "IT", "SF": "SF", "n": "n", "p": "p",
+    "2n": "2n", "3n": "3n", "2p": "2p", "3p": "3p", "d": "d", "t": "t", "e+": "e+",
+    "B-n": "β−n", "B-2n": "β−2n", "B-3n": "β−3n", "B-4n": "β−4n",
+    "B+p": "β+p", "B+2p": "β+2p", "B+3p": "β+3p", "B-p": "β−p",
+    "B+A": "β−α", "B-A": "β−α", "B+SF": "β+SF", "B-SF": "β−SF",
+    "B+pA": "β+pα", "B-d": "β−d", "B-t": "β−t",
+    "2B-": "2β−", "2B+": "2β+",
+}
+# 重核簇放射：14C、24Ne、28Mg …
+_CLUSTER = re.compile(r"^(\d{1,2})([A-Z][a-z]?)$")
+
+
+def nubase_decay_modes(br) -> str:
+    """NUBASE 的 BR 字段 -> 表里的衰变模式文本。
+
+    源格式：“B-=100”、“A=97.5 3;B-=2.5 3”、“B- ?”、“A~7.7e-9#”、
+    “B+p ?”、“IS=99.9855 78”。IS 是同位素丰度，不属于衰变模式，跳过。
+    强度 ≥ 99.9% 的不写百分比（与维基口径的写法一致），其余照抄原值。
+    """
+    parts = []
+    for seg in str(br or "").split(";"):
+        seg = seg.strip()
+        if not seg or seg.startswith("IS="):
+            continue
+        m = re.match(r"^([A-Za-z0-9+\-]+)\s*(.*)$", seg)
+        if not m:
+            continue
+        code, rest = m.group(1), m.group(2).strip()
+        sym = DECAY_MAP.get(code)
+        if sym is None:
+            cm = _CLUSTER.match(code)
+            sym = f"{cm.group(1)}{cm.group(2)}" if cm else code
+        rest = rest.lstrip("=~ ").strip()
+        if not rest or rest.startswith("?"):
+            parts.append(f"{sym} ?")
+            continue
+        val = rest.split()[0]
+        if val in {"100", "100.0", "~100"}:
+            parts.append(sym)
+        else:
+            parts.append(f"{sym} ({val}%)")
+    return "; ".join(parts)
+
+
+def load_nubase_decay() -> dict[tuple[int, int], str]:
+    """基态 (z, A) -> NUBASE 的衰变模式文本；转换不出内容的条目不入表。"""
+    path = PROC / "nubase2020.csv"
+    if not path.exists():
+        return {}
+    nb = pd.read_csv(path, encoding="utf-8-sig")
+    gs = nb[nb["idx"] == 0]
+    out = {}
+    for z, a, br in zip(gs["z"], gs["A"], gs["衰变与丰度"]):
+        txt = nubase_decay_modes(br)
+        if txt:
+            out[(int(z), int(a))] = txt
+    return out
+
+
+def load_ame() -> dict[tuple[int, int], tuple]:
+    """(z, A) -> (原子质量 u, 质量过剩 keV, 每核子结合能 keV)。"""
+    path = PROC / "ame2020.csv"
+    if not path.exists():
+        return {}
+    ame = pd.read_csv(path, encoding="utf-8-sig")
+    return {(int(z), int(a)): (u, me, be)
+            for z, a, u, me, be in zip(ame["z"], ame["A"], ame["原子质量_u"],
+                                       ame["质量过剩_keV"], ame["每核子结合能_keV"])}
+
+
 def fix_exponent(text: str) -> str:
     """'5.70×103 y' -> '5.70×10^3 y'，并清理不可见空格与脚注标记。"""
     t = str(text or "").replace("\u00a0", " ")
@@ -216,6 +289,21 @@ def main() -> None:
                  for z, a, s in zip(df["z"], df["A"], df["自旋.I"])]
     df["decay_modes"] = [clean_chain(t) for t in df["decay_modes"]]
     df["daughters"] = [clean_chain(t) for t in df["daughters"]]
+    # 衰变模式（含分支强度）改用 NUBASE2020 的 BR 列；转不出内容的才保留维基口径。
+    decay = load_nubase_decay()
+    df["decay_modes"] = [decay.get((int(z), int(a))) or d
+                        for z, a, d in zip(df["z"], df["A"], df["decay_modes"])]
+
+    # 原子质量改用 AME2020（NIST 转发的那份对其中的 143 个核素已经过时），
+    # 并补上质量过剩与每核子结合能 —— 这两个是新信息，表里以前没有。
+    ame = load_ame()
+    df["质量过剩_keV"] = [ame.get((int(z), int(a)), (None, None, None))[1]
+                      for z, a in zip(df["z"], df["A"])]
+    df["结合能每核子_keV"] = [ame.get((int(z), int(a)), (None, None, None))[2]
+                        for z, a in zip(df["z"], df["A"])]
+    df["mass_u"] = [ame[(int(z), int(a))][0] if ame.get((int(z), int(a)))
+                    and ame[(int(z), int(a))][0] is not None else m
+                    for z, a, m in zip(df["z"], df["A"], df["mass_u"])]
 
     # 自旋为零的标记（NV / 量子相关应用的关键判据）
     df["自旋"] = [
@@ -226,7 +314,8 @@ def main() -> None:
 
     all_cols = [
         "z", "sym", "cn", "en", "cat", "isotope", "A", "N",
-        "天然丰度%", "mass_u", "半衰期", "half_life_s", "decay_modes", "daughters",
+        "天然丰度%", "mass_u", "质量过剩_keV", "结合能每核子_keV",
+        "半衰期", "half_life_s", "decay_modes", "daughters",
         "自旋", "稳定性", "再生性",
         "A1", "A2", "A3", "A4", "A5", "A6", "A7",
         "可及性评分", "可及性等级", "等级含义", "工艺类别", "纯度上限", "成本等级",
