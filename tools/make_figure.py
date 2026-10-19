@@ -19,7 +19,7 @@ import pandas as pd
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from elements import ELEMENTS, GRID  # noqa: E402
-from supply import SUPPLY  # noqa: E402
+from supply import SHORT, SUPPLY  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROC = ROOT / "data" / "processed"
@@ -186,8 +186,8 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
     out.append(f'<text x="9" y="93" font-size="22" font-weight="700" '
                f'fill="{INK}">{z}</text>')
     if z in TRACE:
-        out.append(f'<text x="9" y="110" font-size="8.5" fill="{MUTED}">'
-                   f'{esc(TRACE[z])}</text>')
+        out.append(f'<text x="9" y="110" font-size="9" fill="#4A4A4A" '
+                   f'font-family="{FONT}">{esc(TRACE[z])}</text>')
 
     # 同位素组成饼图（偏左，给右侧标签留出一整列宽位置）
     cx, cy, r = bw - 105, 100, 30
@@ -301,13 +301,13 @@ def element_box(z: int, sym: str, name: str, cat: str, score: float, grade: str,
             out.append(f'<text x="9" y="{bh - 22}" font-size="11.5" font-weight="700" '
                        f'fill="{INK}" font-family="{FONT}">{esc(interval)}</text>')
 
-    # 分离产业国（粗粒度，仅稳定同位素分离）：全部列出，宽度不够时自动缩小字号
+    # 分离产业国（粗粒度，仅稳定同位素分离）：用中文简称，宽度不够时自动缩小字号
     if sym in SUPPLY:
         codes, level, _note = SUPPLY[sym]
-        text = "分离 " + "·".join(codes)
-        fs = 6.9
+        text = "分离 " + "、".join(SHORT.get(c, c) for c in codes)
+        fs = 8.6
         avail = bw - 12
-        while fs > 5.0 and est_text_width(text, fs) > avail:
+        while fs > 6.0 and est_text_width(text, fs) > avail:
             fs -= 0.2
         fill = MUTED if level != "低" else "#8C8C8C"
         out.append(f'<text x="9" y="{bh - 6}" font-size="{fs:.1f}" fill="{fill}" '
@@ -439,7 +439,7 @@ def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -
     out.append(f'<text x="{mx}" y="{ly3}" font-size="13" font-weight="700" '
                f'fill="{NAVY}">分离产业国</text>')
     out.append(f'<text x="{mx + 84}" y="{ly3 + 1}" font-size="12.5" fill="{INK}">'
-               f'方框底部一行「分离 US·RU·CN」= 公开可查的稳定同位素分离产业所在国；'
+               f'方框底部一行「分离 美、俄、中」= 公开可查的稳定同位素分离产业所在国；'
                f'单同位素元素无此产业，故不标。粗粒度判断，未列 ≠ 无能力。</text>')
 
     # 图例四：饼图与质量数标记（回应「灰色圆圈 / [98] 是什么」这类疑问）
@@ -455,7 +455,7 @@ def iptei_svg(elems: pd.DataFrame, nist: pd.DataFrame, nuclides: pd.DataFrame) -
                f'原子量处写 [98] 同理：无标准原子量，方括号内为该质量数</text>')
 
     out.append(f'<text x="{mx}" y="{h - 56}" font-size="12.5" fill="{MUTED}">'
-               f'读法示例：碳的饼图里 12 98.93% 与 13 1.07%，徽标 B56，分离 US·RU·CN·JP —— '
+               f'读法示例：碳的饼图里 12 98.93% 与 13 1.07%，徽标 B56，分离 美、俄、中、日 —— '
                f'「碳」很便宜，但「碳-12 富集到 99.9%」只在这四个国家里做。</text>')
     out.append(f'<text x="{mx}" y="{h - 36}" font-size="12.5" fill="{MUTED}">'
                f'方框底色只表示元素类别；可及性只用右上角徽标表示，两者互不干扰。</text>')
@@ -521,12 +521,12 @@ def heatmap_svg(elems: pd.DataFrame) -> str:
                    f'{rec["元素可及性评分"]:.0f}</text>')
 
         if sym in SUPPLY:
-            codes = SUPPLY[sym][0]
-            fs, maxw = 6.0, cw - 12
+            codes = [SHORT.get(c, c) for c in SUPPLY[sym][0]]
+            fs, maxw = 6.5, cw - 10
             lines: list[str] = []
             cur = ""
             for c in codes:
-                piece = c if not cur else "·" + c
+                piece = c if not cur else "、" + c
                 if cur and est_text_width(cur + piece, fs) > maxw:
                     lines.append(cur)
                     cur = c

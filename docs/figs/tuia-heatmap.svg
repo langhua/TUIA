@@ -25,17 +25,17 @@
 <text x="79.0" y="110" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">1</text>
 <text x="79.0" y="134" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">H</text>
 <text x="79.0" y="151" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">95</text>
-<text x="79.0" y="162" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU·CN·CA·IN·AR</text>
+<text x="79.0" y="162" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄、中、加、印、阿根</text>
 <rect x="1649" y="96" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1694.0" y="110" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">2</text>
 <text x="1694.0" y="134" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">He</text>
 <text x="1694.0" y="151" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">88</text>
-<text x="1694.0" y="162" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU</text>
+<text x="1694.0" y="162" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄</text>
 <rect x="34" y="181" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="79.0" y="195" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">3</text>
 <text x="79.0" y="219" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Li</text>
 <text x="79.0" y="236" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">70</text>
-<text x="79.0" y="247" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU·CN</text>
+<text x="79.0" y="247" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄、中</text>
 <rect x="129" y="181" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="174.0" y="195" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">4</text>
 <text x="174.0" y="219" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Be</text>
@@ -44,22 +44,22 @@
 <text x="1219.0" y="195" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">5</text>
 <text x="1219.0" y="219" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">B</text>
 <text x="1219.0" y="236" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">70</text>
-<text x="1219.0" y="247" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU·CN</text>
+<text x="1219.0" y="247" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄、中</text>
 <rect x="1269" y="181" width="90" height="80" rx="5" fill="#7CB342"/>
 <text x="1314.0" y="195" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">6</text>
 <text x="1314.0" y="219" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">C</text>
 <text x="1314.0" y="236" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">56</text>
-<text x="1314.0" y="247" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU·CN·JP</text>
+<text x="1314.0" y="247" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄、中、日</text>
 <rect x="1364" y="181" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1409.0" y="195" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">7</text>
 <text x="1409.0" y="219" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">N</text>
 <text x="1409.0" y="236" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">95</text>
-<text x="1409.0" y="247" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU·CN·JP</text>
+<text x="1409.0" y="247" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄、中、日</text>
 <rect x="1459" y="181" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1504.0" y="195" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">8</text>
 <text x="1504.0" y="219" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">O</text>
 <text x="1504.0" y="236" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">95</text>
-<text x="1504.0" y="247" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU·CN·JP</text>
+<text x="1504.0" y="247" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄、中、日</text>
 <rect x="1554" y="181" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1599.0" y="195" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">9</text>
 <text x="1599.0" y="219" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">F</text>
@@ -68,7 +68,7 @@
 <text x="1694.0" y="195" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">10</text>
 <text x="1694.0" y="219" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Ne</text>
 <text x="1694.0" y="236" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">53</text>
-<text x="1694.0" y="247" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1694.0" y="247" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="34" y="266" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="79.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">11</text>
 <text x="79.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Na</text>
@@ -77,7 +77,7 @@
 <text x="174.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">12</text>
 <text x="174.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Mg</text>
 <text x="174.0" y="321" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">88</text>
-<text x="174.0" y="332" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU</text>
+<text x="174.0" y="332" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄</text>
 <rect x="1174" y="266" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1219.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">13</text>
 <text x="1219.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Al</text>
@@ -86,7 +86,7 @@
 <text x="1314.0" y="280" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">14</text>
 <text x="1314.0" y="304" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Si</text>
 <text x="1314.0" y="321" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">55</text>
-<text x="1314.0" y="332" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·CN·US</text>
+<text x="1314.0" y="332" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、中、美</text>
 <rect x="1364" y="266" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1409.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">15</text>
 <text x="1409.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">P</text>
@@ -96,13 +96,13 @@
 <text x="1504.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">16</text>
 <text x="1504.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">S</text>
 <text x="1504.0" y="321" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">88</text>
-<text x="1504.0" y="332" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1504.0" y="332" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1554" y="266" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="1556.5" y="268.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1599.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">17</text>
 <text x="1599.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Cl</text>
 <text x="1599.0" y="321" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">73</text>
-<text x="1599.0" y="332" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU</text>
+<text x="1599.0" y="332" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄</text>
 <rect x="1649" y="266" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="1694.0" y="280" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">18</text>
 <text x="1694.0" y="304" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ar</text>
@@ -112,13 +112,13 @@
 <text x="79.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">19</text>
 <text x="79.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">K</text>
 <text x="79.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">88</text>
-<text x="79.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU</text>
+<text x="79.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄</text>
 <rect x="129" y="351" width="90" height="80" rx="5" fill="#1B5E20"/>
 <rect x="131.5" y="353.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="174.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">20</text>
 <text x="174.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ca</text>
 <text x="174.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">88</text>
-<text x="174.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU</text>
+<text x="174.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄</text>
 <rect x="224" y="351" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="269.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">21</text>
 <text x="269.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Sc</text>
@@ -128,7 +128,7 @@
 <text x="364.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">22</text>
 <text x="364.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ti</text>
 <text x="364.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">73</text>
-<text x="364.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="364.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="414" y="351" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="459.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">23</text>
 <text x="459.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">V</text>
@@ -138,7 +138,7 @@
 <text x="554.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">24</text>
 <text x="554.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Cr</text>
 <text x="554.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">73</text>
-<text x="554.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="554.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="604" y="351" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="649.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">25</text>
 <text x="649.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Mn</text>
@@ -147,7 +147,7 @@
 <text x="744.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">26</text>
 <text x="744.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Fe</text>
 <text x="744.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">69</text>
-<text x="744.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="744.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="794" y="351" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="839.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">27</text>
 <text x="839.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Co</text>
@@ -157,30 +157,30 @@
 <text x="934.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">28</text>
 <text x="934.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ni</text>
 <text x="934.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="934.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="934.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="984" y="351" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="986.5" y="353.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1029.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">29</text>
 <text x="1029.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Cu</text>
 <text x="1029.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="1029.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1029.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1079" y="351" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="1081.5" y="353.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1124.0" y="365" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">30</text>
 <text x="1124.0" y="389" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Zn</text>
 <text x="1124.0" y="406" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="1124.0" y="417" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1124.0" y="417" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1174" y="351" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="1219.0" y="365" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">31</text>
 <text x="1219.0" y="389" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Ga</text>
 <text x="1219.0" y="406" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">46</text>
-<text x="1219.0" y="417" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1219.0" y="417" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1269" y="351" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="1271.5" y="353.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1314.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">32</text>
 <text x="1314.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ge</text>
 <text x="1314.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="1314.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1314.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1364" y="351" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1409.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">33</text>
 <text x="1409.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">As</text>
@@ -190,30 +190,30 @@
 <text x="1504.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">34</text>
 <text x="1504.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Se</text>
 <text x="1504.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">69</text>
-<text x="1504.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1504.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1554" y="351" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="1556.5" y="353.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1599.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">35</text>
 <text x="1599.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Br</text>
 <text x="1599.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">70</text>
-<text x="1599.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">US·RU</text>
+<text x="1599.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">美、俄</text>
 <rect x="1649" y="351" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="1651.5" y="353.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1694.0" y="365" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">36</text>
 <text x="1694.0" y="389" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Kr</text>
 <text x="1694.0" y="406" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">77</text>
-<text x="1694.0" y="417" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1694.0" y="417" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="34" y="436" width="90" height="80" rx="5" fill="#7CB342"/>
 <text x="79.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">37</text>
 <text x="79.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Rb</text>
 <text x="79.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">51</text>
-<text x="79.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="79.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="129" y="436" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="131.5" y="438.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="174.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">38</text>
 <text x="174.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Sr</text>
 <text x="174.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">63</text>
-<text x="174.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="174.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="224" y="436" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="269.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">39</text>
 <text x="269.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Y</text>
@@ -223,7 +223,7 @@
 <text x="364.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">40</text>
 <text x="364.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Zr</text>
 <text x="364.0" y="491" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="364.0" y="502" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US·FR</text>
+<text x="364.0" y="502" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美、法</text>
 <rect x="414" y="436" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="459.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">41</text>
 <text x="459.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Nb</text>
@@ -233,7 +233,7 @@
 <text x="554.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">42</text>
 <text x="554.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Mo</text>
 <text x="554.0" y="491" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="554.0" y="502" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="554.0" y="502" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="604" y="436" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="649.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">43</text>
 <text x="649.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Tc</text>
@@ -243,7 +243,7 @@
 <text x="744.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">44</text>
 <text x="744.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ru</text>
 <text x="744.0" y="491" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">70</text>
-<text x="744.0" y="502" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="744.0" y="502" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="794" y="436" width="90" height="80" rx="5" fill="#7CB342"/>
 <text x="839.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">45</text>
 <text x="839.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Rh</text>
@@ -253,41 +253,41 @@
 <text x="934.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">46</text>
 <text x="934.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Pd</text>
 <text x="934.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="934.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="934.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="984" y="436" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="1029.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">47</text>
 <text x="1029.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Ag</text>
 <text x="1029.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">44</text>
-<text x="1029.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1029.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1079" y="436" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="1081.5" y="438.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1124.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">48</text>
 <text x="1124.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Cd</text>
 <text x="1124.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="1124.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1124.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1174" y="436" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="1219.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">49</text>
 <text x="1219.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">In</text>
 <text x="1219.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">44</text>
-<text x="1219.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU</text>
+<text x="1219.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄</text>
 <rect x="1269" y="436" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="1271.5" y="438.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1314.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">50</text>
 <text x="1314.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Sn</text>
 <text x="1314.0" y="491" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="1314.0" y="502" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1314.0" y="502" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1364" y="436" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="1366.5" y="438.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1409.0" y="450" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">51</text>
 <text x="1409.0" y="474" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Sb</text>
 <text x="1409.0" y="491" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">50</text>
-<text x="1409.0" y="502" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU</text>
+<text x="1409.0" y="502" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄</text>
 <rect x="1459" y="436" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="1461.5" y="438.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="1504.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">52</text>
 <text x="1504.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Te</text>
 <text x="1504.0" y="491" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="1504.0" y="502" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1504.0" y="502" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1554" y="436" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1599.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">53</text>
 <text x="1599.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">I</text>
@@ -297,7 +297,7 @@
 <text x="1694.0" y="450" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">54</text>
 <text x="1694.0" y="474" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Xe</text>
 <text x="1694.0" y="491" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">70</text>
-<text x="1694.0" y="502" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1694.0" y="502" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="34" y="521" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="79.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">55</text>
 <text x="79.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Cs</text>
@@ -307,46 +307,46 @@
 <text x="174.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">56</text>
 <text x="174.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Ba</text>
 <text x="174.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">63</text>
-<text x="174.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="174.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="319" y="521" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="321.5" y="523.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="364.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">72</text>
 <text x="364.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Hf</text>
 <text x="364.0" y="576" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="364.0" y="587" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="364.0" y="587" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="414" y="521" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="459.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">73</text>
 <text x="459.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ta</text>
 <text x="459.0" y="576" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">77</text>
-<text x="459.0" y="587" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="459.0" y="587" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="509" y="521" width="90" height="80" rx="5" fill="#2E7D32"/>
 <rect x="511.5" y="523.5" width="85" height="75" rx="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="554.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">74</text>
 <text x="554.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">W</text>
 <text x="554.0" y="576" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">68</text>
-<text x="554.0" y="587" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US·CN</text>
+<text x="554.0" y="587" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美、中</text>
 <rect x="604" y="521" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="649.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">75</text>
 <text x="649.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Re</text>
 <text x="649.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">35</text>
-<text x="649.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="649.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="699" y="521" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="701.5" y="523.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="744.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">76</text>
 <text x="744.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Os</text>
 <text x="744.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="744.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="744.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="794" y="521" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="839.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">77</text>
 <text x="839.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Ir</text>
 <text x="839.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">38</text>
-<text x="839.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="839.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="889" y="521" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="891.5" y="523.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="934.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">78</text>
 <text x="934.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Pt</text>
 <text x="934.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="934.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="934.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="984" y="521" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1029.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">79</text>
 <text x="1029.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Au</text>
@@ -356,17 +356,17 @@
 <text x="1124.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">80</text>
 <text x="1124.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Hg</text>
 <text x="1124.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">50</text>
-<text x="1124.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1124.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1174" y="521" width="90" height="80" rx="5" fill="#F2C14E"/>
 <text x="1219.0" y="535" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">81</text>
 <text x="1219.0" y="559" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Tl</text>
 <text x="1219.0" y="576" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">35</text>
-<text x="1219.0" y="587" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1219.0" y="587" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1269" y="521" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="1314.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">82</text>
 <text x="1314.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Pb</text>
 <text x="1314.0" y="576" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">76</text>
-<text x="1314.0" y="587" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1314.0" y="587" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1364" y="521" width="90" height="80" rx="5" fill="#1B5E20"/>
 <text x="1409.0" y="535" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">83</text>
 <text x="1409.0" y="559" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Bi</text>
@@ -476,7 +476,7 @@
 <text x="364.0" y="731" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">58</text>
 <text x="364.0" y="755" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ce</text>
 <text x="364.0" y="772" font-size="10" font-weight="600" fill="#FFFFFF" text-anchor="middle">77</text>
-<text x="364.0" y="783" font-size="6.0" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="364.0" y="783" font-size="6.5" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="414" y="717" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="459.0" y="731" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">59</text>
 <text x="459.0" y="755" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Pr</text>
@@ -486,7 +486,7 @@
 <text x="554.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">60</text>
 <text x="554.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Nd</text>
 <text x="554.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="554.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="554.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="604" y="717" width="90" height="80" rx="5" fill="#E58E7B"/>
 <text x="649.0" y="731" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">61</text>
 <text x="649.0" y="755" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Pm</text>
@@ -496,18 +496,18 @@
 <text x="744.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">62</text>
 <text x="744.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Sm</text>
 <text x="744.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="744.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="744.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="794" y="717" width="90" height="80" rx="5" fill="#7CB342"/>
 <text x="839.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">63</text>
 <text x="839.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Eu</text>
 <text x="839.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">50</text>
-<text x="839.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="839.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="889" y="717" width="90" height="80" rx="5" fill="#7CB342"/>
 <rect x="891.5" y="719.5" width="85" height="75" rx="4" fill="none" stroke="#1B1B1B" stroke-opacity="0.55" stroke-width="0.9" stroke-dasharray="3 2.5"/>
 <text x="934.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">64</text>
 <text x="934.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Gd</text>
 <text x="934.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="934.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US·CN</text>
+<text x="934.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美、中</text>
 <rect x="984" y="717" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="1029.0" y="731" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">65</text>
 <text x="1029.0" y="755" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Tb</text>
@@ -517,7 +517,7 @@
 <text x="1124.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">66</text>
 <text x="1124.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Dy</text>
 <text x="1124.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="1124.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1124.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1174" y="717" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="1219.0" y="731" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">67</text>
 <text x="1219.0" y="755" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ho</text>
@@ -527,7 +527,7 @@
 <text x="1314.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">68</text>
 <text x="1314.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Er</text>
 <text x="1314.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">59</text>
-<text x="1314.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1314.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1364" y="717" width="90" height="80" rx="5" fill="#2E7D32"/>
 <text x="1409.0" y="731" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">69</text>
 <text x="1409.0" y="755" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Tm</text>
@@ -537,12 +537,12 @@
 <text x="1504.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">70</text>
 <text x="1504.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Yb</text>
 <text x="1504.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">50</text>
-<text x="1504.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1504.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="1554" y="717" width="90" height="80" rx="5" fill="#7CB342"/>
 <text x="1599.0" y="731" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">71</text>
 <text x="1599.0" y="755" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">Lu</text>
 <text x="1599.0" y="772" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">51</text>
-<text x="1599.0" y="783" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·US</text>
+<text x="1599.0" y="783" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、美</text>
 <rect x="224" y="802" width="90" height="80" rx="5" fill="#E58E7B"/>
 <text x="269.0" y="816" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">89</text>
 <text x="269.0" y="840" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Ac</text>
@@ -559,8 +559,8 @@
 <text x="554.0" y="816" font-size="7.5" fill="#1B1B1B" fill-opacity="0.85" text-anchor="middle">92</text>
 <text x="554.0" y="840" font-size="18" font-weight="700" fill="#1B1B1B" text-anchor="middle">U</text>
 <text x="554.0" y="857" font-size="10" font-weight="600" fill="#1B1B1B" text-anchor="middle">57</text>
-<text x="554.0" y="868" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">RU·FR·NL·DE·UK·US·CN·JP</text>
-<text x="554.0" y="877" font-size="6.0" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">BR·IN·IR·PK</text>
+<text x="554.0" y="868" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">俄、法、荷、德、英、美</text>
+<text x="554.0" y="877" font-size="6.5" fill="#1B1B1B" fill-opacity="0.8" text-anchor="middle" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">中、日、巴西、印、伊朗…</text>
 <rect x="604" y="802" width="90" height="80" rx="5" fill="#E58E7B"/>
 <text x="649.0" y="816" font-size="7.5" fill="#FFFFFF" fill-opacity="0.85" text-anchor="middle">93</text>
 <text x="649.0" y="840" font-size="18" font-weight="700" fill="#FFFFFF" text-anchor="middle">Np</text>
