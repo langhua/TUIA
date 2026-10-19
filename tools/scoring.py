@@ -51,8 +51,17 @@ METHOD_SCORE: dict[str, tuple[float, float, str]] = {
     "裂变产物分离":  (58, 70, "98%"),
     "发生器洗脱":    (60, 65, "载体依赖性"),
     "加速器合成":    (30, 50, "放射化学纯"),
+    "加速器合成（常规）": (70, 60, "药品级放射化学纯"),
     "散裂/放射性束": (15, 20, "原子级"),
 }
+
+# 已产业化的加速器核素：几十台商用回旋器每天在产，和 ²¹¹At / ²²⁵Ac 这种
+# 全世界一两台装置的产物不是同一回事。原来两者共用一个 A2=30，
+# 导致 ¹⁸F（全球日产千居）与 ²²⁵Ac（年产不足百居）几乎同分。
+ACCEL_ROUTINE: frozenset[str] = frozenset({
+    "18F", "11C", "13N", "15O",          # 短半衰期 PET 四件套，医院就地生产
+    "68Ga", "89Zr", "64Cu", "111In", "123I", "201Tl",   # 商用回旋/发生器产物
+})
 
 # 元素 enrich 字段里的写法 -> METHOD_SCORE 的键
 METHOD_ALIAS: list[tuple[str, str]] = [
@@ -128,10 +137,11 @@ def method_from_text(text: str) -> str:
     return best_key
 
 
-def method_from_route(route: str) -> str | None:
+def method_from_route(route: str, nuclide: str | None = None) -> str | None:
     """放射性核素按生产路线定类；稳定核素返回 None（改用元素级默认）。
 
     判定顺序：先看有没有同位素富集工艺（有就按它），再看是不是天然直接可得。
+    `nuclide` 仅用于区分「加速器合成（常规）」与「加速器合成」。
     """
     r = route or ""
     enrich_classes = ("气体离心", "低温蒸馏", "化学交换", "离子交换色谱",
@@ -146,6 +156,8 @@ def method_from_route(route: str) -> str | None:
     if any(k in r for k in ("散裂",)):
         return "散裂/放射性束"
     if any(k in r for k in ("加速器", "回旋加速器")):
+        if nuclide and nuclide in ACCEL_ROUTINE:
+            return "加速器合成（常规）"
         return "加速器合成"
     if any(k in r for k in ("发生器",)):
         return "发生器洗脱"

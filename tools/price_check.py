@@ -112,6 +112,9 @@ def main() -> None:
         t_meas = tier_of(cny_g)
         t_cur = curated_tier(key)
         mult = ratio = None
+        stamp = {"实测成交（EIA 表 S1b）": f"EIA-{year}",
+                 "推算（EIA 进料价 + SWU 价）": f"EIA-{year}",
+                 "二手（LANL 2003 报告，经维基转述）": "LANL-2003"}.get(src, str(year))
         if t_cur is not None:
             ratio = cny_g / BAND_CENTER[t_cur]
             mult = math.log10(ratio)
@@ -128,6 +131,7 @@ def main() -> None:
             "对应核素": (f"{key[1]}{key[0]}" if key else "—"),
             "年份": year,
             "价格_元_per_g": round(cny_g, 3),
+            "来源·时间": stamp,
             "来源类型": src,
             "依据": basis,
             "实测层级": f"T{t_meas}",
@@ -140,7 +144,7 @@ def main() -> None:
     df.to_csv(PROC / "price_vs_tier.csv", index=False, encoding="utf-8-sig")
 
     print("T 层级带宽（元/g）：<1 T0 ｜ 1–10 T1 ｜ 10–100 T2 ｜ 100–1000 T3 ｜ ≥1000 T4")
-    print(df[["价格锚点", "年份", "价格_元_per_g", "实测层级", "策展层级",
+    print(df[["价格锚点", "来源·时间", "价格_元_per_g", "实测层级", "策展层级",
               "实测_策展档中心倍数", "差数量级", "判定"]]
           .to_string(index=False))
     judged = df[df["差数量级"].notna()]

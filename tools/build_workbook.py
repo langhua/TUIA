@@ -373,9 +373,8 @@ def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
         cell.alignment = Alignment(horizontal="center")
 
     by_z = elems.set_index("Z")
-    # 哪些元素至少有 1 条人工策展记录 —— 用来画粗框（评审建议：一眼看出哪些经过了人工核定）
-    _nu = pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig")
-    curated_syms = set(_nu.loc[_nu["策展"].astype(bool), "sym"])
+    # 与 02 页徽标同口径：只标「最佳可及同位素来自人工策展」的元素（= 实心徽标那几个）
+    curated_syms = set(elems.loc[elems["最佳可及来源"] == "策展", "元素"])
     for z, (col, row) in GRID.items():
         rec = by_z.loc[z]
         r = 3 + row
@@ -431,32 +430,37 @@ def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
              "反过来 H（氢）拿到 80 分：D 可以靠化学交换吨级生产，但 T（氚）完全是另一条路——"
              "见 09_再生闭环。", 19)
     note_row(ws, lr + 4,
-             "**粗框 = 该元素至少有 1 条人工策展记录**（共 "
-             f"{len(curated_syms)} 个元素、{int(_nu['策展'].astype(bool).sum())} 条核素）；"
-             "无粗框的元素，其分数完全由丰度与元素级工艺推定，只能看趋势。", 19)
+             "**粗框 = 该元素「最佳可及同位素」来自人工策展**（共 "
+             f"{len(curated_syms)} 个元素）—— 与 02 页徽标实心 / 空心是同一个口径："
+             "实心徽标就出现在带粗框的格子里。无粗框的元素，其分数完全由丰度与元素级工艺推定，只能看趋势。", 19)
 
 
 def sheet_elements(wb: Workbook, elems: pd.DataFrame) -> None:
     ws = wb.create_sheet("03_元素总表")
     title_block(ws, "03 · 元素总表", "118 元素 × 同位素结构 × 最佳可及性", 15)
     cols = ["Z", "元素", "中文", "英文", "类别", "已知核素数", "稳定同位素数",
-            "天然丰度范围%", "最长寿命同位素", "最长寿命", "最佳可及同位素", "最佳可及来源",
+            "原生放射性核素数", "天然丰度范围%", "最长寿命同位素", "最长寿命",
+            "最佳可及同位素", "最佳可及来源",
             "元素可及性评分", "元素可及性等级", "可及性跨度", "主流富集工艺"]
-    widths = [5, 6, 7, 13, 10, 9, 10, 17, 15, 14, 14, 9, 11, 11, 9, 22]
+    widths = [5, 6, 7, 13, 10, 9, 10, 12, 17, 15, 14, 14, 9, 11, 11, 9, 22]
     df = elems[cols].copy()
-    end = write_table(ws, df, 4, widths, wrap_cols=[16], score_cols=[13])
+    end = write_table(ws, df, 4, widths, wrap_cols=[17], score_cols=[14])
     for r in range(5, end + 1):
-        g = ws.cell(row=r, column=14).value
+        g = ws.cell(row=r, column=15).value
         if g in GRADE_FILL:
-            c = ws.cell(row=r, column=14)
+            c = ws.cell(row=r, column=15)
             c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
             c.font = Font(name="微软雅黑", size=9, bold=True, color=GRADE_TEXT[g])
-    ws.auto_filter.ref = f"A4:P{end}"
+    ws.auto_filter.ref = f"A4:Q{end}"
     ws.freeze_panes = "C5"
     note_row(ws, end + 2,
              "「可及性跨度」= 该元素最高与最低核素评分之差。跨度大的元素（如 H、U、Ca）说明"
              "「同一元素的不同同位素是完全不同的产品」——这正是本图想强调的事。"
-             "「最佳可及来源」标注该格是人工策展还是模型推定。", 16)
+             "「最佳可及来源」标注该格是人工策展还是模型推定。", 17)
+    note_row(ws, end + 3,
+             "**三列计数口径不同，不要相加去凑「已知核素数」**：稳定 + 原生放射性 + 其余（完全由人工合成的放射性核素）= 已知核素。"
+             "⁴⁰K、⁵⁰V、⁸⁷Rb、¹⁷⁶Lu、¹¹⁵In、¹³⁸La 都归在「原生放射性」（半衰期比地球年龄还长，天然就存在），"
+             "它们既不属于「稳定」，也不属于人工放射性。", 17, size=9.5)
 
 
 def sheet_iptei(wb: Workbook, elems: pd.DataFrame, focus: pd.DataFrame) -> None:
@@ -471,6 +475,7 @@ def sheet_iptei(wb: Workbook, elems: pd.DataFrame, focus: pd.DataFrame) -> None:
         rows.append({
             "Z": e["Z"], "元素": e["元素"], "中文": e["中文"],
             "稳定同位素": e["稳定同位素数"],
+            "原生放射性": e["原生放射性核素数"],
             "已知核素": e["已知核素数"],
             "天然丰度范围%": e["天然丰度范围%"],
             "最长寿命同位素": e["最长寿命同位素"],
@@ -481,15 +486,15 @@ def sheet_iptei(wb: Workbook, elems: pd.DataFrame, focus: pd.DataFrame) -> None:
             "焦点应用": tags or "—",
         })
     df = pd.DataFrame(rows)
-    widths = [5, 6, 8, 9, 8, 18, 15, 14, 14, 10, 7, 40]
-    end = write_table(ws, df, 4, widths, wrap_cols=[12], score_cols=[10])
+    widths = [5, 6, 8, 9, 11, 8, 18, 15, 14, 14, 10, 7, 40]
+    end = write_table(ws, df, 4, widths, wrap_cols=[13], score_cols=[11])
     for r in range(5, end + 1):
-        g = ws.cell(row=r, column=11).value
+        g = ws.cell(row=r, column=12).value
         if g in GRADE_FILL:
-            c = ws.cell(row=r, column=11)
+            c = ws.cell(row=r, column=12)
             c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
             c.font = Font(name="微软雅黑", size=9, bold=True, color=GRADE_TEXT[g])
-    ws.auto_filter.ref = f"A4:L{end}"
+    ws.auto_filter.ref = f"A4:M{end}"
     ws.freeze_panes = "C5"
     note_row(ws, end + 2,
              "IPTEI 原图用方块表示每种稳定/长寿命同位素的丰度与半衰期。本表保留这些量，"
@@ -513,20 +518,40 @@ def sheet_nuclides(wb: Workbook, nuclides: pd.DataFrame) -> None:
     df.columns = ["Z", "元素", "同位素", "A", "N", "天然丰度%", "原子质量 u",
                   "质量过剩 keV", "半衰期", "半衰期(秒)", "衰变模式", "自旋 I",
                   "稳定性", "可及性评分", "等级", "工艺类别", "可得量级", "策展"]
-    widths = [5, 6, 9, 5, 5, 11, 14, 12, 16, 12, 26, 16, 12, 10, 6, 13, 10, 6]
+
+    def _shape(q: str) -> str:
+        if q in ("千居级", "居级", "毫居级", "微居级"):
+            return "按活度"
+        if q == "原子级":
+            return "单原子（不可称量）"
+        if q == "升级":
+            return "按体积"
+        if q in ("吨级", "公斤级", "克级", "毫克级", "微克级"):
+            return "可称量"
+        return "—"
+
+    df.insert(len(df.columns) - 1, "获得形态", df["可得量级"].map(_shape))
+    widths = [5, 6, 9, 5, 5, 11, 14, 12, 16, 12, 26, 16, 12, 10, 6, 13, 10, 12, 6]
     end = write_table(ws, df, 4, widths, score_cols=[14],
                       num_format={7: "0.000####", 8: "0.0", 10: "0.000E+00"})
     for r in range(5, end + 1):
+        if bool(ws.cell(row=r, column=19).value):
+            # 策展行加粗（评审建议：一眼分出人工核定与模型推定）
+            for cc in range(1, 20):
+                cur = ws.cell(row=r, column=cc)
+                cur.font = Font(name="微软雅黑", size=8.5, bold=True, color=INK)
         g = ws.cell(row=r, column=15).value
         if g in GRADE_FILL:
             c = ws.cell(row=r, column=14)
             c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
             c.font = Font(name="微软雅黑", size=8.5, bold=True, color=GRADE_TEXT[g])
-    ws.auto_filter.ref = f"A4:R{end}"
+    ws.auto_filter.ref = f"A4:S{end}"
     ws.freeze_panes = "D5"
+    n_cur_all = int(nuclides["策展"].astype(bool).sum())
     note_row(ws, end + 2,
              "本表绝大多数核素没有人工策展，其可及性评分由「天然丰度 + 元素级主流工艺 + 推定成本层级」"
-             "推出，属趋势性估计（「策展」列为否）。要做采购决策，请看 06_可及性目录。", 18)
+             f"推出，属趋势性估计（「策展」列为否）。**加粗行 = 人工策展（{n_cur_all} 条）**；"
+             "要做采购决策，请看 06_可及性目录。", 19)
     note_row(ws, end + 3,
              f"**收录口径**：本表 {len(nuclides):,} 条 = NIST Atomic Weights 表里的全部核素条目"
              "（含天然丰度未知、以及尚未观测到但已给出评估质量者）。"
@@ -613,7 +638,8 @@ def sheet_model(wb: Workbook) -> None:
         "反应堆活化": "(n,γ)/(n,p) 路线，取决于靶材与反应堆档期",
         "裂变产物分离": "从乏燃料中提取，依附后处理能力，政治敏感",
         "发生器洗脱": "母体-子体发生器，医院的「同位素水龙头」",
-        "加速器合成": "回旋/直线加速器，短半衰期核素的唯一来源",
+        "加速器合成": "回旋/直线加速器，短半衰期核素的唯一来源（研究型：全世界一两台装置）",
+        "加速器合成（常规）": "商用回旋批量生产、医院级货期（¹⁸F、⁶⁸Ga、¹¹¹In 等），与上一行不是一回事",
         "散裂/放射性束": "散裂靶与在线同位素分离，产量以原子计",
     }
     for i, (k, (a2, a7, pur)) in enumerate(METHOD_SCORE.items()):
@@ -1136,6 +1162,11 @@ def sheet_limits(wb: Workbook) -> None:
         "与 IUPAC 无隶属关系。",
         "价格数据的时效：EIA 价格截至 2025 交付年度（2026-07 发布）；³H 价格是 2003 年文献值。"
         "引用成本数字时请连同年份一起引。",
+        "**许可**：代码与脚本 Apache-2.0（仓库 `LICENSE`）；文字、评分模型、数据与图形 CC BY-SA 4.0。"
+        "引用本仓数据时请注明「TUIA v0.1, 2026」；需要其他许可请在仓库开 issue。",
+        "**反馈渠道**：GitHub Issues → https://github.com/langhua/TUIA/issues "
+        "（数据疑误请带上：核素名 + 你看到的数值 + 你依据的出处，便于逐条核）。"
+        "数据与口径的完整说明在 `docs/methodology.md`，本文只保留结论。",
     ]
     for i, t in enumerate(legal, start=1):
         note_row(ws, rc + i, f"· {t}", 5, size=9.5)
@@ -1572,15 +1603,16 @@ def sheet_prices(wb: Workbook) -> None:
              "100–1000 → T3 ｜ ≥1000 → T4。判定用「离档中心几个数量级」，"
              "因为每一档本身就是一个十倍带宽，只看「差几档」会把 700 倍的偏离说成「相邻」。",
              9, size=9)
-    pv2 = pv[["价格锚点", "年份", "价格_元_per_g", "实测层级", "策展层级",
+    pv2 = pv[["价格锚点", "来源·时间", "价格_元_per_g", "实测层级", "策展层级",
               "实测_策展档中心倍数", "差数量级", "判定", "依据"]].copy()
-    pv2.columns = ["价格锚点", "年份", "价格 元/g", "实测", "策展",
+    pv2.columns = ["价格锚点", "来源·时间", "价格 元/g", "实测", "策展",
                    "实测/档中心", "差数量级", "判定", "依据"]
-    end4 = write_table(ws, pv2, r4 + 2, [30, 7, 12, 7, 7, 12, 10, 18, 44],
+    end4 = write_table(ws, pv2, r4 + 2, [30, 13, 12, 7, 7, 12, 10, 18, 44],
                        wrap_cols=[1, 9],
                        num_format={3: "#,##0.000", 7: "0.00"})
     judged = pv[pv["差数量级"].notna()]
     ok = int((judged["差数量级"].abs() <= 1.0).sum())
+    n_cur = int(pd.read_csv(PROC / "tuia_nuclides.csv", encoding="utf-8-sig")["策展"].astype(bool).sum())
     bullets4 = [
         f"① 能对照的锚点 {len(judged)} 个，**{ok} 个落在 ±1 个数量级内**："
         "铀那一档（天然铀 1.08 元/g、HEU 里的 ²³⁵U 412 元/g）与策展的 T1 / T3 完全对得上。",
@@ -1591,7 +1623,7 @@ def sheet_prices(wb: Workbook) -> None:
         "③ 本表**没有**去改 ³H 的策展等级：证据只有二手一条（LANL 2003 报告经维基转述），"
         "而且方向是随时间上偏（聚变需求推高）。拿到当期报价后再决定改 T4，"
         "否则就是拿一条 20 多年前的二手数字去动全表的评分。",
-        "④ **一个锚点撑不起全表**：231 条策展里只有 4 条能对照（都是铀和氚）。"
+        f"④ **一个锚点撑不起全表**：{n_cur} 条策展里只有 4 条能对照（都是铀和氚）。"
         "其余核素的 T 值没有任何外部价格可核 —— 这正是第一条的结论在表内的体现。",
     ]
     for i, t in enumerate(bullets4, start=1):

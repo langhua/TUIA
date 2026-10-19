@@ -171,7 +171,7 @@ def score_row(row: dict) -> dict:
     route = route if isinstance(route, str) else ""
     enrich_text = row.get("enrich_text")
     enrich_text = enrich_text if isinstance(enrich_text, str) else ""
-    method = method_from_route(route) or method_from_text(enrich_text)
+    method = method_from_route(route, row.get("isotope")) or method_from_text(enrich_text)
     if stable and not route:
         method = method_from_text(enrich_text)
     # 天然占比 ≥90% 的核素，推定行默认「无需富集」（策展行按其写明路线为准）
@@ -351,6 +351,7 @@ def main() -> None:
             "Z": e.z, "元素": e.sym, "中文": e.cn, "英文": e.en, "类别": e.cat,
             "已知核素数": len(sub),
             "稳定同位素数": len(stable),
+            "原生放射性核素数": len(sub[sub["稳定性"] == "原生放射性"]),
             "天然丰度范围%": (f"{fracs.min():.4g} – {fracs.max():.4g}" if len(fracs) else "—"),
             "最长寿命同位素": (longest["isotope"] if longest is not None else "—"),
             "最长寿命": (longest["半衰期"] if longest is not None else "—"),
