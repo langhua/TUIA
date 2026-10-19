@@ -1,0 +1,266 @@
+"""合并 NIST + Wikipedia + 策展层，产出三张分析用数据表。
+
+输出
+----
+data/processed/tuia_nuclides.csv   全部核素（约 3500 行，含推定评分）
+data/processed/tuia_focus.csv      焦点目录（策展 200+ 核素，含完整评分）
+data/processed/tuia_elements.csv   118 元素汇总
+"""
+
+from __future__ import annotations
+
+import pathlib
+import re
+import sys
+
+import pandas as pd
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from curation import CURATION, ISOMERS  # noqa: E402
+from elements import BY_SYM, ELEMENTS  # noqa: E402
+from supply import COUNTRIES, SUPPLY  # noqa: E402
+from scoring import (METHOD_SCORE, TIER_SCORE, abundance_score, composite,  # noqa: E402
+                     grade_of, method_from_route, method_from_text, quantity_score,
+                     regen_class, regulatory_score, supply_score)
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+PROC = ROOT / "data" / "processed"
+OUT_ALL = PROC / "tuia_nuclides.csv"
+OUT_FOCUS = PROC / "tuia_focus.csv"
+OUT_ELEM = PROC / "tuia_elements.csv"
+OUT_SUPPLY = PROC / "tuia_supply.csv"
+
+
+def fix_exponent(text: str) -> str:
+    """'5.70×103 y' -> '5.70×10^3 y'，并清理不可见空格与脚注标记。"""
+    t = str(text or "").replace("\u00a0", " ")
+    t = re.sub(r"\[\s*n\s*\d+\s*\]|\[\d+\]", "", t)
+    t = re.sub(r"[×x]10(\d+)", r"×10^\1", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def clean_chain(text) -> str:
+    """衰变模式/子体文字清理：去脚注、去 Stable 占位。"""
+    if not isinstance(text, str):
+        return ""
+    t = re.sub(r"\[\s*n\s*\d+\s*\]|\[\d+\]", "", text)
+    parts = [p.strip() for p in t.split(";")]
+    parts = [p for p in parts if p and p.lower() != "stable"]
+    return "; ".join(parts)
+
+
+def stability_of(kind: str, frac: float | None, hl_s: float | None) -> str:
+    if kind == "stable":
+        return "稳定"
+    if frac is not None and frac > 0:
+        return "原生放射性"
+    if hl_s and hl_s > 3.15e7 * 1e8:
+        return "长寿命放射性"
+    return "放射性"
+
+
+def score_row(row: dict) -> dict:
+    z = row["z"]
+    frac = row.get("abundance_frac")
+    hl_kind = row.get("half_life_kind") or "unknown"
+    stable = hl_kind == "stable"
+
+    # ---- 工艺类别
+    route = row.get("route")
+    route = route if isinstance(route, str) else ""
+    enrich_text = row.get("enrich_text")
+    enrich_text = enrich_text if isinstance(enrich_text, str) else ""
+    method = method_from_route(route) or method_from_text(enrich_text)
+    if stable and not route:
+        method = method_from_text(enrich_text)
+    # 天然占比 ≥90% 的核素，推定行默认「无需富集」（策展行按其写明路线为准）
+    if (not route and frac is not None and not pd.isna(frac) and frac >= 0.90
+            and method != "无需富集"):
+        method = "无需富集"
+
+    a2, a7, purity_ceiling = METHOD_SCORE.get(method, (60, 80, "—"))
+
+    # ---- 成本 / 量级
+    tier = row.get("tier")
+    if pd.isna(tier):
+        if frac is None or pd.isna(frac):
+            tier = 4                      # 人工核素：只按活度计
+        elif frac >= 0.5:
+            tier = 1                      # 天然主成分，按工业品买
+        elif frac >= 0.01:
+            tier = 2                      # 需中等富集
+        elif frac >= 1e-4:
+            tier = 3                      # 需大幅富集
+        else:
+            tier = 4
+    tier = int(tier)
+
+    qty = row.get("qty")
+    if not isinstance(qty, str):
+        if frac is None or pd.isna(frac):
+            qty = "微克级"
+        elif frac > 0.01:
+            qty = "吨级"
+        elif frac > 1e-4:
+            qty = "公斤级"
+        else:
+            qty = "克级"
+
+    subs = {
+        "A1": round(abundance_score(frac), 1),
+        "A2": a2,
+        "A3": TIER_SCORE.get(tier, 20),
+        "A4": quantity_score(qty),
+        "A5": supply_score(qty, tier),
+        "A6": regulatory_score(z, frac, tier),
+        "A7": a7,
+    }
+    score = composite(subs)
+    grade, grade_label = grade_of(score)
+    out = dict(subs)
+    out.update({
+        "可及性评分": score,
+        "可及性等级": grade,
+        "等级含义": grade_label,
+        "工艺类别": method,
+        "纯度上限": purity_ceiling,
+        "成本等级": tier,
+        "可得量级": qty,
+    })
+    return out
+
+
+def main() -> None:
+    nist = pd.read_csv(PROC / "nist_all.csv")
+    wiki = pd.read_csv(PROC / "isotopes_wiki.csv")
+    wiki = wiki.rename(columns={"A": "A"})
+    df = nist.merge(
+        wiki[["z", "A", "half_life_text", "half_life_s", "half_life_kind",
+              "decay_modes", "daughters", "spin", "mass_text"]],
+        on=["z", "A"], how="outer",
+    )
+    df["sym"] = [ELEMENTS[int(z) - 1].sym for z in df.z]
+    df["en"] = [ELEMENTS[int(z) - 1].en for z in df.z]
+    df["cn"] = [ELEMENTS[int(z) - 1].cn for z in df.z]
+    df["cat"] = [ELEMENTS[int(z) - 1].cat for z in df.z]
+    df["enrich_text"] = [ELEMENTS[int(z) - 1].enrich for z in df.z]
+    df["N"] = df["A"] - df["z"]
+    df["isotope"] = df["A"].astype(int).astype(str) + df["sym"]
+
+    # 策展层并表
+    focus = pd.DataFrame(CURATION, columns=["sym", "A", "tags", "route", "tier", "qty", "note"])
+    focus = focus.merge(
+        pd.DataFrame([(e.sym, e.z, e.en, e.cn, e.cat, e.enrich) for e in ELEMENTS],
+                    columns=["sym", "z", "en", "cn", "cat", "enrich_text"]),
+        on="sym", how="left")
+    focus["key"] = focus["sym"] + "-" + focus["A"].astype(int).astype(str)
+    cur = focus.set_index("key")
+
+    df["_key"] = df["sym"] + "-" + df["A"].astype(int).astype(str)
+    df = df.merge(
+        cur[["tags", "route", "tier", "qty", "note"]],
+        left_on="_key", right_index=True, how="left",
+    )
+    df["策展"] = df["tags"].notna()
+
+    # 逐行评分
+    scored = [score_row(r) for r in df.to_dict("records")]
+    df = pd.concat([df.reset_index(drop=True), pd.DataFrame(scored)], axis=1)
+
+    df["稳定性"] = [
+        stability_of(r.get("half_life_kind") or "unknown", r.get("abundance_frac"),
+                     r.get("half_life_s"))
+        for r in df.to_dict("records")
+    ]
+    df["再生性"] = [regen_class(r if isinstance(r, str) else "", s == "稳定")
+                    for r, s in zip(df["route"], df["稳定性"])]
+
+    df["半衰期"] = [
+        "稳定" if k == "stable" else (fix_exponent(t) if isinstance(t, str) and t else "—")
+        for t, k in zip(df["half_life_text"], df["half_life_kind"])
+    ]
+    df["天然丰度%"] = [None if pd.isna(f) else round(float(f) * 100, 6)
+                       for f in df["abundance_frac"]]
+    df["自旋.I"] = df["spin"].fillna("").replace({"nan": ""})
+    df["decay_modes"] = [clean_chain(t) for t in df["decay_modes"]]
+    df["daughters"] = [clean_chain(t) for t in df["daughters"]]
+
+    # 自旋为零的标记（NV / 量子相关应用的关键判据）
+    df["自旋"] = [
+        "0（偶偶核，无核自旋）" if (int(z) % 2 == 0 and (int(a) - int(z)) % 2 == 0)
+        else (s if isinstance(s, str) and s and s != "nan" else "—")
+        for z, a, s in zip(df["z"], df["A"], df["自旋.I"])
+    ]
+
+    all_cols = [
+        "z", "sym", "cn", "en", "cat", "isotope", "A", "N",
+        "天然丰度%", "mass_u", "半衰期", "half_life_s", "decay_modes", "daughters",
+        "自旋", "稳定性", "再生性",
+        "A1", "A2", "A3", "A4", "A5", "A6", "A7",
+        "可及性评分", "可及性等级", "等级含义", "工艺类别", "纯度上限", "成本等级",
+        "可得量级", "策展", "tags", "route", "note",
+    ]
+    allview = df[all_cols].sort_values(["z", "A"]).reset_index(drop=True)
+    allview.to_csv(OUT_ALL, index=False, encoding="utf-8-sig")
+
+    focus_out = allview[allview["策展"]].copy()
+    focus_out = focus_out.sort_values(["z", "A"]).reset_index(drop=True)
+    focus_out.to_csv(OUT_FOCUS, index=False, encoding="utf-8-sig")
+
+    # ---------------- 元素汇总 ----------------
+    rows = []
+    for e in ELEMENTS:
+        sub = allview[allview["z"] == e.z]
+        stable = sub[sub["稳定性"] == "稳定"]
+        radio = sub[sub["稳定性"] != "稳定"]
+        best = None
+        if len(sub):
+            cand = sub.sort_values(["可及性评分", "策展", "A"],
+                                   ascending=[False, False, False])
+            best = cand.iloc[0]
+        longest = None
+        if len(radio):
+            cand = radio.dropna(subset=["half_life_s"])
+            if len(cand):
+                longest = cand.sort_values("half_life_s", ascending=False).iloc[0]
+        fracs = sub["天然丰度%"].dropna()
+        rows.append({
+            "Z": e.z, "元素": e.sym, "中文": e.cn, "英文": e.en, "类别": e.cat,
+            "已知核素数": len(sub),
+            "稳定同位素数": len(stable),
+            "天然丰度范围%": (f"{fracs.min():.4g} – {fracs.max():.4g}" if len(fracs) else "—"),
+            "最长寿命同位素": (longest["isotope"] if longest is not None else "—"),
+            "最长寿命": (longest["半衰期"] if longest is not None else "—"),
+            "最佳可及同位素": (best["isotope"] if best is not None else "—"),
+            "最佳可及来源": ("策展" if best is not None and bool(best["策展"]) else "推定"),
+            "元素可及性评分": (best["可及性评分"] if best is not None else 0),
+            "元素可及性等级": (best["可及性等级"] if best is not None else "E"),
+            "可及性跨度": (round(sub["可及性评分"].max() - sub["可及性评分"].min(), 1)
+                           if len(sub) else 0),
+            "主流富集工艺": e.enrich,
+        })
+    pd.DataFrame(rows).to_csv(OUT_ELEM, index=False, encoding="utf-8-sig")
+
+    # ---------------- 分离产业国 ----------------
+    sup_rows = []
+    for sym, (codes, level, note) in SUPPLY.items():
+        e = BY_SYM[sym]
+        sup_rows.append({
+            "Z": e.z, "元素": sym, "中文": e.cn, "英文": e.en,
+            "供应国数": len(codes),
+            "供应国": "、".join(COUNTRIES.get(c, c) for c in codes),
+            "国家码": " ".join(codes),
+            "置信度": level,
+            "主流分离工艺": e.enrich,
+            "说明": note,
+        })
+    pd.DataFrame(sup_rows).sort_values("Z").to_csv(
+        OUT_SUPPLY, index=False, encoding="utf-8-sig")
+
+    print(f"nuclides={len(allview)} focus={len(focus_out)} elements={len(rows)} "
+          f"supply={len(sup_rows)}")
+    print(allview["可及性等级"].value_counts().to_string())
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="724" viewBox="0 0 900 724" font-family="'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif">
+<rect width="900" height="724" fill="#FAF7F0"/>
+<text x="28" y="42" font-size="22" font-weight="700" fill="#0F2740">可及性不是元素的属性，而是同位素的属性</text>
+<text x="28" y="66" font-size="11.5" fill="#6B6B6B">同一元素内的两端可以差 50 分以上：碳、硅、氦都是这样</text>
+<text x="84" y="107" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">10Be</text>
+<rect x="96" y="96" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="96" width="68.2" height="15" rx="3" fill="#9B2226"/>
+<text x="172.244" y="108" font-size="11" fill="#1B1B1B">12 · E</text>
+<text x="702" y="107" font-size="9.5" fill="#6B6B6B">宇宙成因年代学</text>
+<text x="84" y="133" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">211At</text>
+<rect x="96" y="122" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="122" width="72.2" height="15" rx="3" fill="#9B2226"/>
+<text x="176.192" y="134" font-size="11" fill="#1B1B1B">13 · E</text>
+<text x="702" y="133" font-size="9.5" fill="#6B6B6B">靶向 α 治疗</text>
+<text x="84" y="159" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">225Ac</text>
+<rect x="96" y="148" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="148" width="68.2" height="15" rx="3" fill="#9B2226"/>
+<text x="172.244" y="160" font-size="11" fill="#1B1B1B">12 · E</text>
+<text x="702" y="159" font-size="9.5" fill="#6B6B6B">靶向 α 治疗</text>
+<text x="84" y="185" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">252Cf</text>
+<rect x="96" y="174" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="174" width="107.2" height="15" rx="3" fill="#9B2226"/>
+<text x="211.16" y="186" font-size="11" fill="#1B1B1B">19 · E</text>
+<text x="702" y="185" font-size="9.5" fill="#6B6B6B">自发裂变中子源</text>
+<text x="84" y="211" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">238Pu</text>
+<rect x="96" y="200" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="200" width="148.3" height="15" rx="3" fill="#E58E7B"/>
+<text x="252.332" y="212" font-size="11" fill="#1B1B1B">26 · D</text>
+<text x="702" y="211" font-size="9.5" fill="#6B6B6B">同位素电池（RTG）</text>
+<text x="84" y="237" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">235U</text>
+<rect x="96" y="226" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="226" width="242.5" height="15" rx="3" fill="#F2C14E"/>
+<text x="346.52" y="238" font-size="11" fill="#1B1B1B">43 · C</text>
+<text x="702" y="237" font-size="9.5" fill="#6B6B6B">核燃料</text>
+<text x="84" y="263" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">171Yb</text>
+<rect x="96" y="252" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="252" width="227.3" height="15" rx="3" fill="#F2C14E"/>
+<text x="331.292" y="264" font-size="11" fill="#1B1B1B">40 · C</text>
+<text x="702" y="263" font-size="9.5" fill="#6B6B6B">离子阱量子计算</text>
+<text x="84" y="289" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">157Gd</text>
+<rect x="96" y="278" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="278" width="280.9" height="15" rx="3" fill="#F2C14E"/>
+<text x="384.87199999999996" y="290" font-size="11" fill="#1B1B1B">50 · C</text>
+<text x="702" y="289" font-size="9.5" fill="#6B6B6B">中子俘获治疗</text>
+<text x="84" y="315" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">29Si</text>
+<rect x="96" y="304" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="304" width="279.7" height="15" rx="3" fill="#F2C14E"/>
+<text x="383.744" y="316" font-size="11" fill="#1B1B1B">50 · C</text>
+<text x="702" y="315" font-size="9.5" fill="#6B6B6B">NMR</text>
+<text x="84" y="341" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">28Si</text>
+<rect x="96" y="330" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="330" width="309.1" height="15" rx="3" fill="#7CB342"/>
+<text x="413.07199999999995" y="342" font-size="11" fill="#1B1B1B">55 · B</text>
+<text x="702" y="341" font-size="9.5" fill="#6B6B6B">硅基量子比特</text>
+<text x="84" y="367" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">18O</text>
+<rect x="96" y="356" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="356" width="355.9" height="15" rx="3" fill="#7CB342"/>
+<text x="459.884" y="368" font-size="11" fill="#1B1B1B">63 · B</text>
+<text x="702" y="367" font-size="9.5" fill="#6B6B6B">PET 靶材</text>
+<text x="84" y="393" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">15N</text>
+<rect x="96" y="382" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="382" width="276.4" height="15" rx="3" fill="#F2C14E"/>
+<text x="380.36" y="394" font-size="11" fill="#1B1B1B">49 · C</text>
+<text x="702" y="393" font-size="9.5" fill="#6B6B6B">NV色心</text>
+<text x="84" y="419" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">14N</text>
+<rect x="96" y="408" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="408" width="534.7" height="15" rx="3" fill="#1B5E20"/>
+<text x="638.672" y="420" font-size="11" fill="#1B1B1B">95 · S</text>
+<text x="702" y="419" font-size="9.5" fill="#6B6B6B">基础元素</text>
+<text x="84" y="445" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">13C</text>
+<rect x="96" y="434" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="434" width="280.3" height="15" rx="3" fill="#F2C14E"/>
+<text x="384.30800000000005" y="446" font-size="11" fill="#1B1B1B">50 · C</text>
+<text x="702" y="445" font-size="9.5" fill="#6B6B6B">同位素标记</text>
+<text x="84" y="471" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">12C</text>
+<rect x="96" y="460" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="460" width="315.3" height="15" rx="3" fill="#7CB342"/>
+<text x="419.276" y="472" font-size="11" fill="#1B1B1B">56 · B</text>
+<text x="702" y="471" font-size="9.5" fill="#6B6B6B">NV色心</text>
+<text x="84" y="497" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">10B</text>
+<rect x="96" y="486" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="486" width="390.9" height="15" rx="3" fill="#2E7D32"/>
+<text x="494.852" y="498" font-size="11" fill="#1B1B1B">69 · A</text>
+<text x="702" y="497" font-size="9.5" fill="#6B6B6B">中子吸收</text>
+<text x="84" y="523" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">6Li</text>
+<rect x="96" y="512" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="512" width="385.2" height="15" rx="3" fill="#2E7D32"/>
+<text x="489.212" y="524" font-size="11" fill="#1B1B1B">68 · A</text>
+<text x="702" y="523" font-size="9.5" fill="#6B6B6B">聚变包层</text>
+<text x="84" y="549" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">4He</text>
+<rect x="96" y="538" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="538" width="496.3" height="15" rx="3" fill="#1B5E20"/>
+<text x="600.3199999999999" y="550" font-size="11" fill="#1B1B1B">88 · S</text>
+<text x="702" y="549" font-size="9.5" fill="#6B6B6B">低温</text>
+<text x="84" y="575" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">3He</text>
+<rect x="96" y="564" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="564" width="221.7" height="15" rx="3" fill="#F2C14E"/>
+<text x="325.65199999999993" y="576" font-size="11" fill="#1B1B1B">39 · C</text>
+<text x="702" y="575" font-size="9.5" fill="#6B6B6B">中子探测</text>
+<text x="84" y="601" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">3H</text>
+<rect x="96" y="590" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="590" width="190.6" height="15" rx="3" fill="#E58E7B"/>
+<text x="294.63199999999995" y="602" font-size="11" fill="#1B1B1B">34 · D</text>
+<text x="702" y="601" font-size="9.5" fill="#6B6B6B">聚变燃料</text>
+<text x="84" y="627" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">2H</text>
+<rect x="96" y="616" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="616" width="395.4" height="15" rx="3" fill="#2E7D32"/>
+<text x="499.3639999999999" y="628" font-size="11" fill="#1B1B1B">70 · A</text>
+<text x="702" y="627" font-size="9.5" fill="#6B6B6B">聚变燃料</text>
+<text x="84" y="653" font-size="12.5" font-weight="600" fill="#1B1B1B" text-anchor="end">1H</text>
+<rect x="96" y="642" width="564" height="15" rx="3" fill="#E7E1D4"/>
+<rect x="96" y="642" width="534.7" height="15" rx="3" fill="#1B5E20"/>
+<text x="638.672" y="654" font-size="11" fill="#1B1B1B">95 · S</text>
+<text x="702" y="653" font-size="9.5" fill="#6B6B6B">基础元素</text>
+<text x="28" y="708" font-size="9" fill="#6B6B6B">注：评分 = 七维加权平均 × (0.60 + 0.40 × 最差子维度/100)，见 07_评分模型</text>
+</svg>

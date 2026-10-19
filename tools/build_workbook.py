@@ -1,0 +1,956 @@
+"""生成 TUIA 工作簿：周衍图（The Universal Isotope Atlas）。
+
+输出：dist/TUIA_同位素可及性全景扩展.xlsx
+"""
+
+from __future__ import annotations
+
+import datetime as dt
+import pathlib
+import sys
+
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
+from openpyxl.formatting.rule import ColorScaleRule
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from elements import GRID  # noqa: E402
+from scoring import GRADES, METHOD_SCORE, TIER_LABEL, WEIGHTS  # noqa: E402
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+PROC = ROOT / "data" / "processed"
+DIST = ROOT / "dist"
+OUT = DIST / "TUIA_同位素可及性全景扩展.xlsx"
+
+NAVY = "0F2740"
+NAVY2 = "1B3B5A"
+GOLD = "C9A227"
+CREAM = "FAF7F0"
+SAND = "EFE9DC"
+INK = "1B1B1B"
+MUTED = "5A5A5A"
+
+GRADE_FILL = {
+    "S": "1B5E20", "A": "2E7D32", "B": "7CB342",
+    "C": "F2C14E", "D": "E58E7B", "E": "9B2226",
+}
+GRADE_TEXT = {"S": "FFFFFF", "A": "FFFFFF", "B": "1B1B1B",
+              "C": "1B1B1B", "D": "FFFFFF", "E": "FFFFFF"}
+
+THIN = Side(style="thin", color="D9D3C6")
+BOX = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+
+
+# ------------------------------------------------------------------ 样式工具
+
+def title_block(ws, title: str, subtitle: str, width_cols: int = 12) -> None:
+    ws.sheet_view.showGridLines = False
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=width_cols)
+    c = ws.cell(row=1, column=1, value=title)
+    c.font = Font(name="微软雅黑", size=20, bold=True, color=NAVY)
+    c.alignment = Alignment(vertical="center")
+    ws.row_dimensions[1].height = 34
+
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=width_cols)
+    c = ws.cell(row=2, column=2 - 1, value=subtitle)
+    c.font = Font(name="微软雅黑", size=10, color=MUTED)
+    c.alignment = Alignment(vertical="center")
+    ws.row_dimensions[2].height = 20
+
+
+def header_row(ws, row: int, headers: list[str], widths: list[float],
+               height: int = 34) -> None:
+    for i, (h, w) in enumerate(zip(headers, widths), start=1):
+        cell = ws.cell(row=row, column=i, value=h)
+        cell.font = Font(name="微软雅黑", size=9.5, bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor=NAVY)
+        cell.alignment = Alignment(horizontal="center", vertical="center",
+                                   wrap_text=True)
+        cell.border = BOX
+        ws.column_dimensions[get_column_letter(i)].width = w
+    ws.row_dimensions[row].height = height
+
+
+def write_table(ws, df: pd.DataFrame, start_row: int, widths: list[float],
+                header: list[str] | None = None, band: bool = True,
+                wrap_cols: list[int] | None = None, score_cols: list[int] | None = None,
+                num_format: dict[int, str] | None = None) -> int:
+    headers = header or list(df.columns)
+    header_row(ws, start_row, headers, widths)
+    wrap_cols = wrap_cols or []
+    num_format = num_format or {}
+    for r_i, rec in enumerate(df.itertuples(index=False), start=start_row + 1):
+        for c_i, val in enumerate(rec, start=1):
+            if pd.isna(val):
+                val = None
+            cell = ws.cell(row=r_i, column=c_i, value=val)
+            cell.font = Font(name="微软雅黑", size=9, color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(
+                vertical="center",
+                horizontal="left" if c_i in wrap_cols else "center",
+                wrap_text=c_i in wrap_cols,
+            )
+            if band and (r_i - start_row) % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+            if c_i in num_format:
+                cell.number_format = num_format[c_i]
+    if score_cols:
+        last = start_row + len(df)
+        for c_i in score_cols:
+            col = get_column_letter(c_i)
+            ws.conditional_formatting.add(
+                f"{col}{start_row + 1}:{col}{last}",
+                ColorScaleRule(start_type="num", start_value=0, start_color="F8696B",
+                               mid_type="num", mid_value=55, mid_color="FFEB84",
+                               end_type="num", end_value=100, end_color="63BE7B"),
+            )
+    return start_row + len(df)
+
+
+def note_row(ws, row: int, text: str, ncols: int, size: float = 9,
+             color: str = MUTED) -> None:
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
+    c = ws.cell(row=row, column=1, value=text)
+    c.font = Font(name="微软雅黑", size=size, color=color)
+    c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.row_dimensions[row].height = max(18, 15 * (1 + len(text) // 90))
+
+
+def section(ws, row: int, text: str, ncols: int) -> None:
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
+    c = ws.cell(row=row, column=1, value=text)
+    c.font = Font(name="微软雅黑", size=12, bold=True, color="FFFFFF")
+    c.fill = PatternFill("solid", fgColor=NAVY2)
+    c.alignment = Alignment(vertical="center", indent=1)
+    ws.row_dimensions[row].height = 26
+
+
+# ------------------------------------------------------------------ 各工作表
+
+def sheet_cover(wb: Workbook, nuclides: pd.DataFrame, focus: pd.DataFrame,
+                elems: pd.DataFrame) -> None:
+    ws = wb.active
+    ws.title = "00_封面"
+    ws.sheet_view.showGridLines = False
+    for col, w in zip("ABCDEFGH", [3, 26, 26, 26, 26, 26, 26, 3]):
+        ws.column_dimensions[col].width = w
+
+    ws.merge_cells("B2:G3")
+    c = ws["B2"]
+    c.value = "TUIA"
+    c.font = Font(name="Georgia", size=54, bold=True, color=NAVY)
+    c.alignment = Alignment(vertical="center")
+
+    ws.merge_cells("B4:G4")
+    c = ws["B4"]
+    c.value = "The Universal Isotope Atlas"
+    c.font = Font(name="Georgia", size=22, italic=True, color=GOLD)
+
+    ws.merge_cells("B5:G5")
+    c = ws["B5"]
+    c.value = "周衍图：同位素可及性视角下的周期表全景扩展"
+    c.font = Font(name="微软雅黑", size=15, bold=True, color=NAVY2)
+
+    ws.merge_cells("B7:G9")
+    c = ws["B7"]
+    c.value = (
+        "元素周期表回答「有哪些元素」，IPTEI 回答「它们有哪些同位素」。\n"
+        "本图回答第三个问题：这些同位素，你能不能拿到？拿多少？多贵？受什么限制？\n\n"
+        "灵感起点是氮-空位（NV）金刚石色心：它要求 12C 丰度达到 99.9% 以上，因为 13C 的核自旋\n"
+        "会把量子相干时间压到微秒级。一个化学上「最普通」的元素，在同位素维度上可以贵四个数量级。"
+    )
+    c.font = Font(name="微软雅黑", size=11, color=INK)
+    c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.row_dimensions[7].height = 30
+    ws.row_dimensions[8].height = 30
+    ws.row_dimensions[9].height = 30
+
+    stats = [
+        ("核素总数", f"{len(nuclides):,}"),
+        ("元素覆盖", f"{elems.shape[0]}"),
+        ("策展核素", f"{len(focus)}"),
+        ("可及性维度", "7"),
+    ]
+    row = 11
+    for i, (k, v) in enumerate(stats):
+        col = 2 + i * 1 if i < 4 else 2
+        cell = ws.cell(row=row, column=col + i * 0, value=None)
+    labels = ["核素总数", "元素覆盖", "策展核素", "可及性维度"]
+    values = [f"{len(nuclides):,}", str(elems.shape[0]), f"{len(focus)}", "7"]
+    for i, (lab, val) in enumerate(zip(labels, values)):
+        r = row + (i // 2) * 3
+        cc = 2 + (i % 2) * 3
+        ws.merge_cells(start_row=r, start_column=cc, end_row=r, end_column=cc + 1)
+        cell = ws.cell(row=r, column=cc, value=lab)
+        cell.font = Font(name="微软雅黑", size=9, color=MUTED)
+        cell.alignment = Alignment(horizontal="center")
+        ws.merge_cells(start_row=r + 1, start_column=cc, end_row=r + 1, end_column=cc + 1)
+        cell = ws.cell(row=r + 1, column=cc, value=val)
+        cell.font = Font(name="Georgia", size=24, bold=True, color=GOLD)
+        cell.alignment = Alignment(horizontal="center")
+        ws.row_dimensions[r + 1].height = 32
+
+    ws.merge_cells("B18:G18")
+    c = ws["B18"]
+    c.value = (f"版本 0.1 · 构建于 {dt.date.today().isoformat()} · "
+               "数据源：NIST Atomic Weights and Isotopes（核素质量/丰度）+ "
+               "Wikipedia Isotopes of each element（半衰期/衰变/自旋）+ 人工策展（成本/量级/管制）")
+    c.font = Font(name="微软雅黑", size=8.5, color=MUTED)
+    c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.row_dimensions[18].height = 28
+
+
+def sheet_readme(wb: Workbook) -> None:
+    ws = wb.create_sheet("01_导读")
+    title_block(ws, "导读：怎么用这张图", "五分钟看懂结构，十分钟看懂口径", 6)
+    for col, w in zip("ABCDEF", [4, 22, 60, 34, 18, 3]):
+        ws.column_dimensions[col].width = w
+
+    section(ws, 4, "一、工作簿结构", 5)
+    rows = [
+        ("02_周衍图", "与周期表同构的热力图：每个元素格显示最佳可及同位素的可及性评分", "看整体格局"),
+        ("03_元素总表", "118 元素的同位素统计 + 最佳可及核素 + 可及性评分与跨度", "横向比较元素"),
+        ("04_IPTEI扩展", "IPTEI 的每元素同位素视图，加上「可及性」一列", "对照官方图表"),
+        ("05_同位素全景", f"全部核素逐条列出，含推定可及性评分", "查单个核素"),
+        ("06_可及性目录", "人工策展的焦点核素：用途、路线、成本、量级、一句话要点", "读细节"),
+        ("07_评分模型", "七个子维度的定义、权重、映射表与合成公式", "改模型前必读"),
+        ("08_生产路线图鉴", "各条获取路线的工艺门槛、周期、TRL 与代表设施", "理解为什么贵"),
+        ("09_再生闭环", "哪些核素衰变/消耗后能「回炉」再生，哪些不能", "本图的核心洞见"),
+        ("10_场景推演", "NV 色心、硅量子、靶向α治疗、聚变、双β 等场景的可及性判读", "把图用起来"),
+        ("11_数据源", "逐字段的出处与置信度", "复核"),
+        ("12_使用与局限", "口径、易错点、如何扩展到数千个核素", "别踩坑"),
+        ("13_供应格局", "哪些国家有这条分离产线、置信度多少、口径是什么", "看供应链"),
+    ]
+    header_row(ws, 5, ["#", "工作表", "内容", "什么时候打开"], [4, 22, 60, 34])
+    for i, (a, b, c) in enumerate(rows, start=1):
+        for j, v in enumerate((i, a, b, c), start=1):
+            cell = ws.cell(row=5 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5, color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+
+    section(ws, 18, "二、三个必须先说清的口径", 5)
+    notes = [
+        "① 「可及性」≠「重要性」。它是采购难度，不是科学价值。半衰期只有几小时的核素往往评分很低，"
+        "但它们恰恰是最有价值的诊疗核素——低分说明的是「你必须就在它旁边生产」，不是「它没用」。",
+        "② 成本与量级是量级判断，不是报价。T0–T4 是数量级分层，用于横向比较；真实价格随反应堆档期、"
+        "合同规模、同位素纯度剧烈波动，可能相差 3–5 倍。",
+        "③ 「推定」与「策展」要分清。焦点目录里的 227 条是人工逐条读过路线与量级后写的；"
+        "其余三千余条的可及性评分是由丰度与元素级工艺推出的估计值，只适合看趋势。",
+    ]
+    r = 19
+    for n in notes:
+        note_row(ws, r, n, 4, size=9.5)
+        ws.row_dimensions[r].height = 44
+        r += 1
+
+    section(ws, 23, "三、等级图例", 5)
+    header_row(ws, 24, ["等级", "分数区间", "含义", "典型例子"],
+               [4, 22, 60, 34])
+    examples = {
+        "S": "H-1、O-16、Al-27、Na-23、Fe-56",
+        "A": "C-12、Si-28、Li-7、B-11、D2O",
+        "B": "15N、87Rb、Gd-157、B-10、Mo-98",
+        "C": "U-235、Lu-177、I-131、48Ca、76Ge",
+        "D": "225Ac、252Cf、229Th、3He、10Be",
+        "E": "超重元素、单原子合成核素",
+    }
+    rng = {"S": "80–100", "A": "65–80", "B": "50–65", "C": "35–50",
+           "D": "20–35", "E": "0–20"}
+    for i, (lo, g, label) in enumerate(GRADES, start=1):
+        vals = (g, rng[g], f"{label} —— 需要什么条件才能拿到", examples[g])
+        for j, v in enumerate(vals, start=1):
+            cell = ws.cell(row=24 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5, bold=(j == 1),
+                             color=GRADE_TEXT[g] if j == 1 else INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 4))
+            if j == 1:
+                cell.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+            elif i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+        ws.row_dimensions[25 + i].height = 26
+
+
+def sheet_periodic(wb: Workbook, elems: pd.DataFrame) -> None:
+    ws = wb.create_sheet("02_周衍图")
+    ws.sheet_view.showGridLines = False
+    ws.column_dimensions["A"].width = 7
+    for i in range(2, 20):
+        ws.column_dimensions[get_column_letter(i)].width = 8.6
+
+    ws.merge_cells("B1:S1")
+    c = ws["B1"]
+    c.value = "周衍图 · 同位素可及性全景"
+    c.font = Font(name="Georgia", size=22, bold=True, color=NAVY)
+    ws.row_dimensions[1].height = 32
+
+    ws.merge_cells("B2:S2")
+    c = ws["B2"]
+    c.value = ("每格 = 元素 / 原子序数 / 该元素「最佳可及同位素」的可及性评分。"
+               "颜色越深绿越易得，越红越难。注意：这一格只代表该元素最容易拿到的那条路，"
+               "同元素内部的跨度可能高达 70 分（见 03_元素总表「可及性跨度」）。")
+    c.font = Font(name="微软雅黑", size=9, color=MUTED)
+    c.alignment = Alignment(wrap_text=True, vertical="center")
+    ws.row_dimensions[2].height = 30
+
+    for g in range(1, 19):
+        cell = ws.cell(row=3, column=1 + g, value=g)
+        cell.font = Font(name="微软雅黑", size=7.5, color=MUTED)
+        cell.alignment = Alignment(horizontal="center")
+
+    by_z = elems.set_index("Z")
+    for z, (col, row) in GRID.items():
+        rec = by_z.loc[z]
+        r = 3 + row
+        cell = ws.cell(row=r, column=col + 1)
+        g = rec["元素可及性等级"]
+        try:
+            cell.value = CellRichText([
+                TextBlock(InlineFont(rFont="Calibri", sz=7, color=GRADE_TEXT[g]),
+                          f"{z}\n"),
+                TextBlock(InlineFont(rFont="Calibri", sz=12, b=1, color=GRADE_TEXT[g]),
+                          f"{rec['元素']}\n"),
+                TextBlock(InlineFont(rFont="Calibri", sz=8.5, color=GRADE_TEXT[g]),
+                          f"{rec['元素可及性评分']:.0f}"),
+            ])
+        except Exception:  # noqa: BLE001
+            cell.value = f"{z}\n{rec['元素']}\n{rec['元素可及性评分']:.0f}"
+        cell.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = Border(left=Side(style="thin", color="FFFFFF"),
+                             right=Side(style="thin", color="FFFFFF"),
+                             top=Side(style="thin", color="FFFFFF"),
+                             bottom=Side(style="thin", color="FFFFFF"))
+        cell.font = Font(name="Calibri", size=9, color=GRADE_TEXT[g])
+
+    for r in range(4, 14):
+        ws.row_dimensions[r].height = 42
+    ws.row_dimensions[11].height = 10
+
+    for i, lab in enumerate(["1", "2", "3", "4", "5", "6", "7"]):
+        cell = ws.cell(row=4 + i, column=1, value=lab)
+        cell.font = Font(name="微软雅黑", size=8, color=MUTED)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    for i, lab in enumerate(["镧系", "锕系"]):
+        cell = ws.cell(row=12 + i, column=1, value=lab)
+        cell.font = Font(name="微软雅黑", size=7.5, color=MUTED)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    # 图例
+    lr = 16
+    ws.cell(row=lr, column=2, value="图例").font = Font(name="微软雅黑", size=9, bold=True,
+                                                        color=NAVY)
+    for i, (lo, g, label) in enumerate(GRADES):
+        cell = ws.cell(row=lr + 1, column=2 + i, value=f"{g} {label}")
+        cell.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+        cell.font = Font(name="微软雅黑", size=8, color=GRADE_TEXT[g])
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[get_column_letter(2 + i)].width = 12
+    ws.row_dimensions[lr + 1].height = 20
+
+    note_row(ws, lr + 3,
+             "读法示例：C（碳）拿到 55 分、等级 B —— 因为 12C 天然占 98.93%，但要把 13C 压到 1‰ 以下"
+             "需要低温蒸馏 CO 或离心，成本跳到 T3；而 N（氮）只有 51 分，是因为 N2 的 15N 富集级联更长。"
+             "反过来 H（氢）拿到 80 分：D 可以靠化学交换吨级生产，但 T（氚）完全是另一条路——"
+             "见 09_再生闭环。", 19)
+
+
+def sheet_elements(wb: Workbook, elems: pd.DataFrame) -> None:
+    ws = wb.create_sheet("03_元素总表")
+    title_block(ws, "03 · 元素总表", "118 元素 × 同位素结构 × 最佳可及性", 15)
+    cols = ["Z", "元素", "中文", "英文", "类别", "已知核素数", "稳定同位素数",
+            "天然丰度范围%", "最长寿命同位素", "最长寿命", "最佳可及同位素", "最佳可及来源",
+            "元素可及性评分", "元素可及性等级", "可及性跨度", "主流富集工艺"]
+    widths = [5, 6, 7, 13, 10, 9, 10, 17, 15, 14, 14, 9, 11, 11, 9, 22]
+    df = elems[cols].copy()
+    end = write_table(ws, df, 4, widths, wrap_cols=[16], score_cols=[13])
+    for r in range(5, end + 1):
+        g = ws.cell(row=r, column=14).value
+        if g in GRADE_FILL:
+            c = ws.cell(row=r, column=14)
+            c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+            c.font = Font(name="微软雅黑", size=9, bold=True, color=GRADE_TEXT[g])
+    ws.auto_filter.ref = f"A4:P{end}"
+    ws.freeze_panes = "C5"
+    note_row(ws, end + 2,
+             "「可及性跨度」= 该元素最高与最低核素评分之差。跨度大的元素（如 H、U、Ca）说明"
+             "「同一元素的不同同位素是完全不同的产品」——这正是本图想强调的事。"
+             "「最佳可及来源」标注该格是人工策展还是模型推定。", 16)
+
+
+def sheet_iptei(wb: Workbook, elems: pd.DataFrame, focus: pd.DataFrame) -> None:
+    ws = wb.create_sheet("04_IPTEI扩展")
+    title_block(ws, "04 · IPTEI 扩展", "在 IUPAC 同位素周期表（IPTEI）的每元素视图上，加一列可及性", 10)
+    rows = []
+    for _, e in elems.iterrows():
+        sub = focus[focus["sym"] == e["元素"]]
+        tags = ""
+        if len(sub):
+            tags = "；".join(sorted({t for tt in sub["tags"].dropna() for t in tt.split("·")})[:4])
+        rows.append({
+            "Z": e["Z"], "元素": e["元素"], "中文": e["中文"],
+            "稳定同位素": e["稳定同位素数"],
+            "已知核素": e["已知核素数"],
+            "天然丰度范围%": e["天然丰度范围%"],
+            "最长寿命同位素": e["最长寿命同位素"],
+            "最长寿命": e["最长寿命"],
+            "最佳可及同位素": e["最佳可及同位素"],
+            "可及性评分": e["元素可及性评分"],
+            "等级": e["元素可及性等级"],
+            "焦点应用": tags or "—",
+        })
+    df = pd.DataFrame(rows)
+    widths = [5, 6, 8, 9, 8, 18, 15, 14, 14, 10, 7, 40]
+    end = write_table(ws, df, 4, widths, wrap_cols=[12], score_cols=[10])
+    for r in range(5, end + 1):
+        g = ws.cell(row=r, column=11).value
+        if g in GRADE_FILL:
+            c = ws.cell(row=r, column=11)
+            c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+            c.font = Font(name="微软雅黑", size=9, bold=True, color=GRADE_TEXT[g])
+    ws.auto_filter.ref = f"A4:L{end}"
+    ws.freeze_panes = "C5"
+    note_row(ws, end + 2,
+             "IPTEI 原图用方块表示每种稳定/长寿命同位素的丰度与半衰期。本表保留这些量，"
+             "并新增「最佳可及同位素 / 可及性评分 / 焦点应用」三列 —— 这样一眼能看出"
+             "「这个元素的哪个同位素是真正能被工程使用的」。", 12)
+
+
+def sheet_nuclides(wb: Workbook, nuclides: pd.DataFrame) -> None:
+    ws = wb.create_sheet("05_同位素全景")
+    title_block(ws, "05 · 同位素全景", f"{len(nuclides):,} 个已知核素（NIST + Wikipedia 汇编）", 16)
+    cols = ["z", "sym", "isotope", "A", "N", "天然丰度%", "mass_u", "半衰期",
+            "half_life_s", "decay_modes", "自旋", "稳定性", "可及性评分", "可及性等级",
+            "工艺类别", "可得量级", "策展"]
+    df = nuclides[cols].copy()
+    df.columns = ["Z", "元素", "同位素", "A", "N", "天然丰度%", "原子质量 u", "半衰期",
+                  "半衰期(秒)", "衰变模式", "自旋 I", "稳定性", "可及性评分", "等级",
+                  "工艺类别", "可得量级", "策展"]
+    widths = [5, 6, 9, 5, 5, 11, 14, 16, 12, 20, 16, 12, 10, 6, 13, 10, 6]
+    end = write_table(ws, df, 4, widths, score_cols=[13],
+                      num_format={7: "0.000####", 8: "0.000000", 9: "0.000E+00"})
+    for r in range(5, end + 1):
+        g = ws.cell(row=r, column=14).value
+        if g in GRADE_FILL:
+            c = ws.cell(row=r, column=13)
+            c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+            c.font = Font(name="微软雅黑", size=8.5, bold=True, color=GRADE_TEXT[g])
+    ws.auto_filter.ref = f"A4:Q{end}"
+    ws.freeze_panes = "D5"
+    note_row(ws, end + 2,
+             "本表绝大多数核素没有人工策展，其可及性评分由「天然丰度 + 元素级主流工艺 + 推定成本层级」"
+             "推出，属趋势性估计（「策展」列为否）。要做采购决策，请看 06_可及性目录。", 16)
+
+
+def sheet_focus(wb: Workbook, focus: pd.DataFrame) -> None:
+    ws = wb.create_sheet("06_可及性目录")
+    title_block(ws, "06 · 可及性目录", f"{len(focus)} 个焦点核素：逐条读过路线、成本与量级之后写成", 12)
+    cols = ["isotope", "cn", "tags", "route", "成本等级", "可得量级", "纯度上限",
+            "可及性评分", "可及性等级", "再生性", "note"]
+    df = focus[cols].copy()
+    df["成本等级"] = df["成本等级"].map(lambda x: f"T{int(x)}")
+    df.columns = ["核素", "元素", "用途标签", "主流获取路线", "成本", "可得量级",
+                  "纯度上限", "可及性评分", "等级", "再生性", "要点"]
+    widths = [9, 7, 26, 30, 7, 10, 11, 10, 6, 24, 60]
+    end = write_table(ws, df, 4, widths, wrap_cols=[3, 4, 10, 11], score_cols=[8])
+    for r in range(5, end + 1):
+        g = ws.cell(row=r, column=9).value
+        if g in GRADE_FILL:
+            c = ws.cell(row=r, column=9)
+            c.fill = PatternFill("solid", fgColor=GRADE_FILL[g])
+            c.font = Font(name="微软雅黑", size=9, bold=True, color=GRADE_TEXT[g])
+    ws.auto_filter.ref = f"A4:K{end}"
+    ws.freeze_panes = "C5"
+    note_row(ws, end + 2,
+             "成本列 T0–T4 是数量级分层：T0 大宗商品 / T1 万元每公斤级 / T2 十万元每公斤级 / "
+             "T3 百万元以上每公斤级 / T4 只能按活度或原子数计。可得量级混用质量与活度口径，"
+             "短半衰期核素按居里（Ci）计。", 11)
+
+
+def sheet_model(wb: Workbook) -> None:
+    ws = wb.create_sheet("07_评分模型")
+    title_block(ws, "07 · 评分模型", "透明、可改：把权重和映射表改了，后面的表会跟着变（需重跑脚本）", 7)
+    for col, w in zip("ABCDEFG", [10, 24, 10, 14, 52, 16, 4]):
+        ws.column_dimensions[col].width = w
+
+    section(ws, 4, "一、合成公式", 6)
+    note_row(ws, 5, "TUIA = Base × (0.60 + 0.40 × min(S_A2…S_A7) / 100)，其中 Base = Σ w_i · S_i", 6,
+             size=11, color=NAVY2)
+    note_row(ws, 6, "加权平均衡量总体，短板折损项衡量「最堵的那一环」——因为可获得性由最差的维度决定。"
+                    "短板只在 A2–A7 上取：A1（天然丰度）是「白送的福利分」，不是工程瓶颈；"
+                    "人工核素的丰度天然为 0，其门槛已经体现在 A2（必须合成）上。", 6)
+    ws.row_dimensions[6].height = 30
+
+    section(ws, 8, "二、七个子维度与权重", 6)
+    header_row(ws, 9, ["代号", "子维度", "权重", "取值来源", "说明"], [10, 24, 10, 14, 52])
+    desc = {
+        "A1": "天然丰度 → 100 + 12.5·log10(f)。天然占 100% 得 100 分，占 1% 得 75 分，占 1ppm 得 25 分，人工核素得 0 分。",
+        "A2": "由富集工艺类别或核合成路线查映射表（见下方三）。",
+        "A3": "由成本层级 T0–T4 映射：100 / 82 / 62 / 38 / 12。",
+        "A4": "由可得量级映射：吨 100、公斤 82、克 62、毫克 44、微克 26、原子 8；活度口径按千居 70 / 居 48 / 毫居 28。",
+        "A5": "由量级与成本层级推出：是否商业化、是否有稳定供应商与货期。",
+        "A6": "按元素与放射性分类：稳定核素 90，原生放射性 28–45，锕系与易裂变材料 12–20。",
+        "A7": "由工艺类别给出可达的同位素纯度上限（气体离心 99.9%，电磁分离 99.99%，加速器产物为放射化学纯）。",
+    }
+    for i, (code, name, w) in enumerate(WEIGHTS):
+        vals = (code, name, w, "见 05/06 表", desc[code])
+        for j, v in enumerate(vals, start=1):
+            cell = ws.cell(row=10 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5, color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 5),
+                                       horizontal="left" if j == 5 else "center")
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+        ws.row_dimensions[10 + i].height = 32
+
+    r = 18
+    section(ws, r, "三、工艺类别映射表", 6)
+    header_row(ws, r + 1, ["工艺类别", "生产难度 A2", "纯化上限 A7", "典型同位素纯度", "说明"],
+               [10, 24, 10, 14, 52])
+    explain = {
+        "无需富集": "天然单同位素或单一稳定核素，直接提纯即可",
+        "低温蒸馏": "H/D、He、Ne、Kr、Xe、CO、NO 等轻分子，工业级成熟",
+        "化学交换": "Girdler 硫化氢法产重水、COLEX 法产 6Li，吨级规模",
+        "气体离心": "UF6/SiF4/GeF4/WF6 等挥发性化合物，需大规模级联",
+        "离子交换色谱": "稀土与过渡金属的常规手段，单级分离系数小、需多次循环",
+        "热扩散": "老工艺，产量小、能耗高",
+        "电磁分离": "calutron，纯度高但产量以毫克计，成本极高",
+        "激光分离": "AVLIS/SILEX 型，选择性强、TRL 偏低、设备昂贵",
+        "反应堆活化": "(n,γ)/(n,p) 路线，取决于靶材与反应堆档期",
+        "裂变产物分离": "从乏燃料中提取，依附后处理能力，政治敏感",
+        "发生器洗脱": "母体-子体发生器，医院的「同位素水龙头」",
+        "加速器合成": "回旋/直线加速器，短半衰期核素的唯一来源",
+        "散裂/放射性束": "散裂靶与在线同位素分离，产量以原子计",
+    }
+    for i, (k, (a2, a7, pur)) in enumerate(METHOD_SCORE.items()):
+        vals = (k, a2, a7, pur, explain.get(k, ""))
+        for j, v in enumerate(vals, start=1):
+            cell = ws.cell(row=r + 2 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5, color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 5),
+                                       horizontal="left" if j == 5 else "center")
+            if i % 2 == 1:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+
+    r2 = r + 2 + len(METHOD_SCORE) + 1
+    section(ws, r2, "四、成本层级定义", 6)
+    header_row(ws, r2 + 1, ["层级", "含义", "", "", "价格量级（同位素产品）"], [10, 24, 10, 14, 52])
+    tier_desc = [
+        ("T0", "大宗商品", "低于 1 元/g，百吨级流通"),
+        ("T1", "工业品", "万元/kg 量级，吨级流通"),
+        ("T2", "专门品", "十万元/kg 量级，公斤级流通"),
+        ("T3", "稀缺品", "百万元/kg 量级，克–公斤级"),
+        ("T4", "战略/实验品", "只能按活度（Ci）或原子数计，无公开市场"),
+    ]
+    for i, (t, lab, note) in enumerate(tier_desc):
+        cell = ws.cell(row=r2 + 2 + i, column=1, value=t)
+        cell.font = Font(name="Ubuntu Mono", size=10, bold=True, color=NAVY)
+        cell.alignment = Alignment(horizontal="center")
+        ws.merge_cells(start_row=r2 + 2 + i, start_column=2, end_row=r2 + 2 + i, end_column=4)
+        cell = ws.cell(row=r2 + 2 + i, column=2, value=lab)
+        cell.font = Font(name="微软雅黑", size=9.5, bold=True)
+        cell = ws.cell(row=r2 + 2 + i, column=5, value=note)
+        cell.font = Font(name="微软雅黑", size=9.5)
+        for j in range(1, 6):
+            ws.cell(row=r2 + 2 + i, column=j).border = BOX
+
+    r3 = r2 + 2 + len(tier_desc) + 1
+    section(ws, r3, "五、等级阈值", 6)
+    note_row(ws, r3 + 1,
+             "S ≥ 80（随手可得） · A 65–80（常规采购） · B 50–65（需专门渠道） · "
+             "C 35–50（稀缺/受限） · D 20–35（实验室级别） · E < 20（基本不可得）", 6,
+             size=10, color=NAVY2)
+
+
+def sheet_routes(wb: Workbook) -> None:
+    ws = wb.create_sheet("08_生产路线图鉴")
+    title_block(ws, "08 · 生产路线图鉴", "同一个核素，走不同路线，可得量级能差六个数量级", 8)
+    rows = [
+        ("气体离心", "挥发性化合物在高速离心场中按质量差逐级富集",
+         "UF6、SiF4、GeF4、WF6、MoF6", "需要千级联，投资十亿量级", "3–18 个月",
+         "9", "级联投资与能耗；化合物必须易挥发", "Urenco、Rosatom、中核"),
+        ("低温蒸馏", "利用沸点差做低温精馏",
+         "CO（13C/12C）、NO（15N）、He、Ne、Kr、Xe", "低温装置 + 高塔板数", "1–6 个月",
+         "9", "能耗与冷量；同系物沸点差极小", "ORNL、Cambridge Isotope、中科院"),
+        ("化学交换", "利用同位素在两相间的平衡常数差",
+         "D2O（Girdler 法）、6Li（COLEX 法）", "大流量塔器，化工级投资", "数周",
+         "9", "回流比大、停留时间长；但工艺简单可放大", "加拿大重水厂、中核"),
+        ("离子交换色谱", "利用树脂上的同位素效应做置换色谱",
+         "稀土（Gd-157、Yb-171/173、Lu-176）、Zn、Cd", "数百米柱长", "数周–数月",
+         "8", "分离系数极小、产率低、溶剂消耗大", "ORNL、Eckert & Ziegler"),
+        ("电磁分离（calutron）", "离子束在磁场中按质量分离",
+         "Mg-26、Ca-48、Pt-195、多种稀土", "单一装置产能以毫克计",
+         "数周", "7", "产能极低、电耗巨大、维护昂贵", "ORNL（历史）、俄罗斯"),
+        ("激光分离", "利用同位素位移选择性电离或解离",
+         "Yb、Ca、Li、U（AVLIS 型）", "中等规模中试", "研发阶段",
+         "5–7", "激光器成本、选择性与通量的矛盾", "多家实验室"),
+        ("反应堆中子活化", "(n,γ)/(n,p)/(n,α) 反应",
+         "Co-60、Ir-192、Mo-99、Lu-177、I-131、P-32", "研究堆 + 热室",
+         "1–6 个月（含冷却）", "9", "受研究堆档期与大修计划制约", "HFIR、BR-2、HFR、CARR"),
+        ("裂变产物分离", "从乏燃料中提取特定裂变产物",
+         "Mo-99、Cs-137、Sr-90、I-131、Ru-106", "后处理设施",
+         "依赖后处理排期", "9", "政治与核安保限制；设施稀缺", "La Hague、Mayak"),
+        ("发生器洗脱", "母体衰变产生子体，现场洗脱",
+         "99Mo/99mTc、68Ge/68Ga、90Sr/90Y、188W/188Re", "母体供应决定一切",
+         "母体 66 h – 271 d", "9", "母体产能是唯一瓶颈", "多家核药企业"),
+        ("加速器合成", "质子/氘核/α 束打靶",
+         "F-18、Ga-68、Zr-89、At-211、Ac-225（部分）", "回旋加速器 + 放射化学",
+         "数小时–数天", "8–9", "射程与靶材；短半衰期决定必须就近", "各地 PET 中心"),
+        ("散裂 / 在线同位素分离", "高能束打散裂靶，在线分离产物",
+         "Ac-225、超重元素、丰中子束流", "大型散裂源", "按束流时间排期",
+         "6–7", "束流时间极稀缺；化学分离复杂", "TRIUMF、LANL、CERN-ISOLDE"),
+        ("天然提取", "直接从矿石/卤水/空气中分离",
+         "Li、B、He、Ne、Ar、Rb、U、Th、Ra", "矿业规模", "周–月",
+         "9", "资源分布与地缘政治", "各矿业公司"),
+    ]
+    df = pd.DataFrame(rows, columns=["路线", "原理", "代表核素", "规模门槛",
+                                     "典型周期", "TRL", "主要瓶颈", "代表设施"])
+    widths = [16, 30, 30, 22, 14, 6, 30, 22]
+    end = write_table(ws, df, 4, widths, wrap_cols=[2, 3, 4, 7, 8])
+    ws.auto_filter.ref = f"A4:H{end}"
+    ws.freeze_panes = "B5"
+    for r in range(5, end + 1):
+        ws.row_dimensions[r].height = 42
+    note_row(ws, end + 2,
+             "TRL = 技术成熟度（1–9）。轨道的选择往往比核素本身更能决定价格："
+             "同一个 99Mo，走反应堆 (n,γ) 路线比活度低两个数量级，但不需要后处理设施；"
+             "走裂变分离路线比活度高，却被后处理能力卡死。", 8)
+
+
+def sheet_loops(wb: Workbook) -> None:
+    ws = wb.create_sheet("09_再生闭环")
+    title_block(ws, "09 · 再生闭环", "哪些核素在消耗之后还能「回炉」，哪些只能一次性消耗", 8)
+    note_row(ws, 3, "这是本图最想提出的一个观察：放射性不是「有半衰期所以不能用」，"
+                    "而是「半衰期之后有没有路回去」。能闭合的循环，等价于把人造核素的寿命"
+                    "变成了材料寿命；不能闭合的，才是真正的消耗品。", 8, size=9.5)
+    ws.row_dimensions[3].height = 34
+
+    rows = [
+        ("钍–铀循环", "232Th + n → 233Th →(β−) 233Pa →(β−) 233U",
+         "232Th（天然 100%）", "233U", "连续（需后处理）", "闭合",
+         "增殖比可大于 1；但 233U 伴生 232U，其子体 Tl-208 强 γ 使燃料制造必须远程操作"),
+        ("锂–氚循环", "6Li + n → 3H + α", "6Li（天然 7.6%，需富集）", "3H",
+         "在线（包层内）", "闭合",
+         "聚变堆自持氚的关键；6Li 富集能力直接决定聚变堆能否不依赖外部氚供应"),
+        ("镎–钚循环", "237Np + n → 238Np →(β−) 238Pu", "237Np（乏燃料）", "238Pu",
+         "数周", "闭合",
+         "RTG 电源的替代路线；瓶颈是 237Np 的获取与高比活度靶的制造"),
+        ("钴–60 换装", "59Co + n → 60Co", "59Co（天然 100%）", "60Co",
+         "数年（半衰期 5.27 a）", "半闭合",
+         "辐照源必须定期换装，退役源可回收再辐照；「再生」依赖反应堆档期而非物理"),
+        ("钼–锝发生器", "98Mo + n → 99Mo →(β−) 99mTc", "98Mo 或裂变产物", "99mTc",
+         "66 h / 6 h", "半闭合",
+         "靶可以反复辐照，但 99Mo 本身无法再生；这是全球核医学最脆弱的一环"),
+        ("钨–铼", "186W + n → 187W →(β−) 188W →(β−) 188Re", "186W（天然 28.4%）", "188Re",
+         "69 d / 17 h", "半闭合", "188W/188Re 发生器让无加速器医院也能用铼治疗"),
+        ("铋–钋", "209Bi + n → 210Bi →(β−) 210Po", "209Bi（天然 100%）", "210Po",
+         "138 d", "半闭合", "α 源与静电消除器的经典路线；产物剧毒，流通量以克计"),
+        ("镭–锕–镭", "226Ra + n → 227Ra → 227Ac → 227Th → 223Ra", "226Ra（铀矿）", "223Ra",
+         "21.8 a / 18.7 d", "闭合",
+         "靶的比活度决定 227Ac 产量；这是 225Ac 与 223Ra 供应的共同上游"),
+        ("硅–磷核掺杂", "30Si + n → 31P", "30Si（需离心富集）", "31P",
+         "在线", "闭合", "晶格级均匀掺杂，且掺杂原子可被中子「重写」"),
+        ("铀–钚增殖", "238U + n → 239U → 239Np → 239Pu", "238U（天然 99.3%）", "239Pu",
+         "数周", "闭合（受政治约束）", "物理上闭合，制度上被 NPT 与保障监督重重限制"),
+        ("氚–氦三", "3H →(β−) 3He", "3H", "3He", "12.3 a", "单向",
+         "产物 3He 无法回到氚；这是「有半衰期但没有回路」的典型"),
+        ("裂变产物", "235U 裂变 → 137Cs / 90Sr / 99Mo / 131I …", "乏燃料", "多种",
+         "随堆运行持续产出", "不可再生",
+         "只能等下一批乏燃料；可获得性完全绑定后处理能力，而不是核素本身的性质"),
+    ]
+    df = pd.DataFrame(rows, columns=["闭环", "核反应链", "输入（靶/母体）", "产物",
+                                     "再生周期", "闭合性", "要点"])
+    widths = [14, 36, 20, 8, 16, 10, 56]
+    end = write_table(ws, df, 5, widths, wrap_cols=[2, 3, 7])
+    for r in range(6, end + 1):
+        ws.row_dimensions[r].height = 40
+        v = ws.cell(row=r, column=6).value
+        color = {"闭合": "1B5E20", "半闭合": "7CB342", "单向": "E58E7B",
+                 "不可再生": "9B2226"}.get(v, "999999")
+        c = ws.cell(row=r, column=6)
+        c.fill = PatternFill("solid", fgColor=color)
+        c.font = Font(name="微软雅黑", size=9, bold=True, color="FFFFFF")
+    ws.auto_filter.ref = f"A5:G{end}"
+    ws.freeze_panes = "C6"
+
+    r = end + 2
+    section(ws, r, "一个推论", 7)
+    note_row(ws, r + 1,
+             "如果把「可及性」拆成「一次性获得」与「持续获得」两个分量，那么闭合循环里的核素"
+             "（233U、3H、238Pu、60Co）的长期成本应该按「维持费」而不是「采购价」来算。"
+             "这也解释了为什么 238Pu 的稀缺不是因为难做，而是因为能做它的反应堆与 237Np 库存有限。",
+             7, size=10)
+
+
+def sheet_scenarios(wb: Workbook) -> None:
+    ws = wb.create_sheet("10_场景推演")
+    title_block(ws, "10 · 场景推演", "把可及性维度放进真实的技术路线里看", 7)
+    rows = [
+        ("NV 色心金刚石", "12C ≥ 99.9%；13C 越少越好；N 杂质单独控制",
+         "12C、13C、14N、15N",
+         "12C 评分约 55（B）；13C 更高成本；15N 属 T3",
+         "低温蒸馏 CO → 甲烷 → CVD；富集气体成本占了材料成本的大头",
+         "同位素纯度是 NV 相干时间的一票否决项；Si 基量子比特同理"),
+        ("硅基量子比特", "28Si ≥ 99.9%，29Si 残余决定退相干",
+         "28Si、29Si、30Si、31P",
+         "28Si 评分约 55（B），公斤级可购",
+         "SiF4 气体离心 + 区熔；与半导体级硅纯化叠加",
+         "同位素纯硅已商业化，但价格仍是天然硅的几十倍"),
+        ("离子阱量子计算", "171Yb+ / 87Sr+ / 40Ca+，需要高丰度单核素",
+         "171Yb、87Sr、40Ca",
+         "171Yb 约 30（D），87Sr 约 32（D）",
+         "电磁分离 / 激光分离；克级",
+         "Yb 与 Sr 的富集是离子阱路线里最容易被忽略的供应链瓶颈"),
+        ("超极化惰性气体", "129Xe（自旋 1/2）、3He",
+         "129Xe、3He",
+         "129Xe 约 58（B）；3He 约 15（E）",
+         "低温蒸馏（Xe）；3He 只能靠氚衰变",
+         "3He 的短缺曾经直接威胁中子探测器供应，是「可及性」影响科技的经典案例"),
+        ("靶向 α 治疗", "225Ac / 211At / 212Pb，半衰期以天计",
+         "225Ac、211At、223Ra、212Pb",
+         "225Ac 约 14（E），211At 约 12（E）",
+         "232Th 散裂或 227Ac 衰变；211At 需 209Bi(α,2n)",
+         "疗效极强但全球年产量以毫居计；这是「核素本身可及」决定产业规模的领域"),
+        ("核医学发生器", "99mTc、68Ga、90Y，医院现场洗脱",
+         "99Mo→99mTc、68Ge→68Ga、90Sr→90Y",
+         "99mTc 约 30（D），但其母体 99Mo 决定一切",
+         "研究堆裂变 + 发生器制造",
+         "供应链是单点结构：一座研究堆检修，全球影像科排队"),
+        ("无中微子双 β 衰变", "76Ge、136Xe、130Te、82Se、48Ca、150Nd",
+         "76Ge、136Xe、130Te",
+         "76Ge 约 25（D），136Xe 约 22（E）",
+         "GeF4/TeF6 离心，氙低温蒸馏",
+         "这类实验的本质是「买同位素」，富集成本常常超过探测器本身"),
+        ("聚变燃料", "D、T、6Li、7Li、11B",
+         "2H、3H、6Li、7Li、11B",
+         "2H 约 80（A）；3H 约 32（D）；6Li 约 45（C）",
+         "重水化学交换；6Li 化学交换；3H 靠堆内增殖",
+         "氚自持是聚变工程的第一道门槛，而它本质上是 6Li 的可及性问题"),
+        ("核钟与精密测量", "229Th（229mTh 约 8 eV 核跃迁）",
+         "229Th、229mTh",
+         "229Th 约 12（E），毫克级",
+         "233U 衰变链 / 反应堆",
+         "整条链路依赖 233U 的可得性，是「可及性决定基础物理能做什么」的例子"),
+        ("中子俘获治疗", "157Gd、10B",
+         "157Gd、10B",
+         "157Gd 约 44（C）；10B 约 47（C）",
+         "离子交换色谱（Gd）；低温蒸馏（B）",
+         "157Gd 的热中子俘获截面是全部稳定核素中最高，但天然只有 15.7%"),
+        ("钍基核能", "232Th → 233U，需要连续后处理",
+         "232Th、233U、233Pa",
+         "232Th 约 78（A）；233U 约 18（E）",
+         "钍矿开采；233U 需增殖与后处理",
+         "「燃料易得、产物难得」的典型：资源不是瓶颈，233U 的制造与防护才是"),
+    ]
+    df = pd.DataFrame(rows, columns=["场景", "对同位素的要求", "关键核素",
+                                     "当前可及性判读", "获取路线", "判读要点"])
+    widths = [16, 30, 22, 26, 30, 44]
+    end = write_table(ws, df, 4, widths, wrap_cols=[2, 3, 4, 5, 6])
+    for r in range(5, end + 1):
+        ws.row_dimensions[r].height = 56
+    ws.freeze_panes = "B5"
+
+    r = end + 2
+    section(ws, r, "反过来读这张表", 6)
+    note_row(ws, r + 1,
+             "把每一行倒过来看，就得到一张「哪些技术先被卡住」的清单：不是被原理卡住，而是被某个"
+             "评分只有 15 的核素卡住。TUIA 的用处不在于给元素排座次，而在于提前指出"
+             "「哪一格是红的、而你的技术正好压在上面」。", 6, size=10)
+
+
+def sheet_sources(wb: Workbook) -> None:
+    ws = wb.create_sheet("11_数据源")
+    title_block(ws, "11 · 数据源与置信度", "每个字段是从哪来的，可信到什么程度", 7)
+    rows = [
+        ("原子序数 / 元素符号 / 名称", "NIST + 人工整理", "NIST Atomic Weights and Isotopic Compositions",
+         "权威", "118 元素全覆盖"),
+        ("质量数 A、原子质量", "NIST（AME2020 汇编）",
+         "physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?isotype=all", "权威",
+         "3352 条记录，含放射性核素"),
+        ("天然丰度", "NIST Isotopic Composition",
+         "同上", "权威", "288 个核素有丰度值（稳定 + 原生放射性）"),
+        ("半衰期 / 衰变模式 / 自旋", "Wikipedia「Isotopes of <element>」",
+         "en.wikipedia.org/wiki/Isotopes_of_<element>", "汇编（二手）",
+         "3494 个核素；原始出处应为 NUBASE2020"),
+        ("同位素纯度上限", "工艺经验值", "本工作簿 07_评分模型", "估计", "按工艺类别给出，非具体产品规格"),
+        ("成本层级 T0–T4", "量级判断", "本工作簿 07_评分模型", "估计（±1 个数量级）",
+         "不构成报价；真实价格随档期与合同波动"),
+        ("可得量级", "量级判断 + 公开产能", "本工作簿 06_可及性目录", "估计", "混用质量与活度口径"),
+        ("管制负担", "法规分类", "IAEA 放射性源分类 / NPT 保障监督", "定性",
+         "仅用于相对比较，不能替代法规判断"),
+        ("用途标签", "人工策展", "本工作簿 06_可及性目录", "定性", "127 个标签，可自行扩充"),
+    ]
+    df = pd.DataFrame(rows, columns=["字段", "来源", "具体出处", "置信度", "备注"])
+    widths = [26, 22, 48, 18, 40]
+    end = write_table(ws, df, 4, widths, wrap_cols=[3, 5])
+    for r in range(5, end + 1):
+        ws.row_dimensions[r].height = 34
+        conf = ws.cell(row=r, column=4).value or ""
+        if conf.startswith("权威"):
+            ws.cell(row=r, column=4).fill = PatternFill("solid", fgColor="C8E6C9")
+        elif conf.startswith("估计"):
+            ws.cell(row=r, column=4).fill = PatternFill("solid", fgColor="FFE0B2")
+        else:
+            ws.cell(row=r, column=4).fill = PatternFill("solid", fgColor="FFF9C4")
+
+    r = end + 2
+    section(ws, r, "如果要做到「可发布级」精度，下一步应该接这些源", 5)
+    up = [
+        "NUBASE2020（核素性质总表，约 3500 条，含半衰期、衰变分支、自旋）",
+        "AME2020（原子质量评估，取代 NIST 汇编里的质量值）",
+        "IUPAC IPTEI 官方图表（每元素同位素可视化的权威版式）",
+        "ENDF/B-VIII.0 或 JENDL-5（中子截面与反应道，做「再生闭环」定量必须有）",
+        "IAEA 同位素价格与产能调查（成本层级从估计升级为实测）",
+    ]
+    for i, t in enumerate(up, start=1):
+        note_row(ws, r + i, f"{i}. {t}", 5, size=9.5)
+
+
+def sheet_limits(wb: Workbook) -> None:
+    ws = wb.create_sheet("12_使用与局限")
+    title_block(ws, "12 · 使用与局限", "这一版能做什么、不能做什么", 6)
+    for col, w in zip("ABCDEF", [4, 26, 80, 20, 14, 3]):
+        ws.column_dimensions[col].width = w
+
+    section(ws, 4, "能做的", 5)
+    can = [
+        "横向比较：同一元素的不同同位素、同一用途的不同候选核素，谁更「拿得到」。",
+        "供应链定位：一个技术路线压在哪几个红色格子上，替代品在哪里。",
+        "教学用途：把「同位素」从抽象的图表变成有价格、有货期、有许可的工程对象。",
+        "扩展模板：新增核素只需在 06 目录里加一行，评分自动生成。",
+    ]
+    for i, t in enumerate(can, start=1):
+        note_row(ws, 5 + i, f"· {t}", 4, size=10)
+
+    section(ws, 11, "不能做的（务必别误用）", 5)
+    cannot = [
+        "不能当报价单：成本层级是数量级，误差可以达到 ±1 个数量级，且不随时间更新。",
+        "不能当核数据表：半衰期与自旋来自二手汇编，做计算前请以 NUBASE2020 / ENDF 为准。",
+        "不能覆盖全部核素：约 3200 个核素的可及性评分是推定的，只有 227 条经过人工策展。",
+        "不能替代法规判断：管制负担只是相对分值，真实许可取决于国家法规与用途。",
+        "不评价「该不该做」：本表只描述获得难度，不涉及伦理、扩散与出口管制合规。",
+        "不是 IUPAC 官方发布物：IPTEI 只作为编排思路的参考，本工作簿与其中图形均独立绘制，"
+        "与 IUPAC 无隶属关系。",
+    ]
+    for i, t in enumerate(cannot, start=1):
+        note_row(ws, 12 + i, f"· {t}", 4, size=10)
+
+    section(ws, 19, "如何扩展", 5)
+    steps = [
+        "① 在 tools/curation.py 的 CURATION 里加一行：(符号, 质量数, 标签, 路线, 成本层级, 量级, 要点)。",
+        "② 运行 python tools/build_dataset.py 重新生成三张 CSV。",
+        "③ 运行 python tools/build_workbook.py 重新生成本工作簿。",
+        "④ 若要替换核物理数据源，只需让 data/processed/nist_all.csv 与 isotopes_wiki.csv 保持同样的列名。",
+    ]
+    for i, t in enumerate(steps, start=1):
+        note_row(ws, 20 + i, t, 4, size=10)
+
+    section(ws, 26, "字段字典（06_可及性目录）", 5)
+    header_row(ws, 27, ["", "字段", "含义", "取值范围"], [4, 26, 80, 20])
+    fields = [
+        ("核素", "质量数 + 元素符号，如 12C", "A + symbol"),
+        ("用途标签", "该核素被什么领域使用，可多选", "· 分隔"),
+        ("主流获取路线", "实际工业/实验室里怎么拿到它", "文本"),
+        ("成本", "T0–T4 数量级分层", "T0–T4"),
+        ("可得量级", "全球年可供应批量（质量或活度）", "吨/公斤/克/毫克/微克/居里"),
+        ("纯度上限", "可达到的同位素纯度", "文本"),
+        ("可及性评分", "七维加权 × 短板折损", "0–100"),
+        ("再生性", "消耗后能否回炉再生", "4 类"),
+    ]
+    for i, (a, b, c) in enumerate(fields, start=1):
+        for j, v in enumerate(("", a, b, c), start=1):
+            cell = ws.cell(row=27 + i, column=j, value=v)
+            cell.font = Font(name="微软雅黑", size=9.5)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+
+
+def sheet_supply(wb: Workbook) -> None:
+    ws = wb.create_sheet("13_供应格局")
+    title_block(ws, "13 · 分离产业格局",
+                "哪些国家手里真的有这条分离产线 —— 只算稳定同位素分离，不含反应堆/加速器产物", 9)
+    df = pd.read_csv(PROC / "tuia_supply.csv")
+    cols = ["Z", "元素", "中文", "供应国数", "供应国", "国家码", "置信度",
+            "主流分离工艺", "说明"]
+    df = df[cols].copy()
+    widths = [5, 7, 8, 9, 30, 26, 8, 22, 70]
+    end = write_table(ws, df, 4, widths, wrap_cols=[5, 6, 8, 9], score_cols=[4])
+    for r in range(5, end + 1):
+        conf = ws.cell(row=r, column=7).value
+        fill = {"高": "C8E6C9", "中": "FFE0B2", "低": "FFCDD2"}.get(conf, "FFFFFF")
+        ws.cell(row=r, column=7).fill = PatternFill("solid", fgColor=fill)
+        ws.row_dimensions[r].height = 30
+    ws.auto_filter.ref = f"A4:I{end}"
+    ws.freeze_panes = "C5"
+
+    r = end + 2
+    section(ws, r, "口径（务必先读）", 9)
+    notes = [
+        "① 只统计「同位素分离/富集」产业：低温蒸馏、气体离心、化学交换、离子交换、电磁分离、激光分离。"
+        "反应堆活化产物（如 60Co、99Mo、177Lu）与加速器产物（如 18F、211At）不在此列 —— 它们的瓶颈是堆和加速器，不是分离。",
+        "② 单同位素元素（Be、F、Na、Al、P、Sc、Mn、Co、As、Y、Nb、Rh、I、Cs、Pr、Tb、Ho、Tm、Au、Bi、Th）"
+        "没有同位素富集产业，故不在表中 —— 这正是它们的「可及性」很高的原因。",
+        "③ 未列出 ≠ 无能力。本表只收公开可查的商业/半工业供应商所在国，是下限；"
+        "军用、试验性、未公开的设施一律不计。",
+        "④ 置信度：高 = 多家公开供应商或在运工厂；中 = 有明确产品线但供应商少；低 = 仅零星公开记录或依赖研究机构少量制备。",
+        "⑤ 国别不等于产能。同一个「US」，可能是一家工厂的几条产线，也可能是十个实验室的合计 —— 具体批量见 06_可及性目录。",
+    ]
+    for i, t in enumerate(notes, start=1):
+        note_row(ws, r + i, t, 9, size=9.5)
+        ws.row_dimensions[r + i].height = 34
+
+    r2 = r + len(notes) + 2
+    section(ws, r2, "一句话结论", 9)
+    note_row(ws, r2 + 1,
+             "把整张表按国别计数，会发现一件很直接的事：全球稳定同位素分离产业基本收敛到「俄罗斯 + 美国」两处，"
+             "轻元素（H/C/N/O/B/Li/Si）才多出中国与日本，而铀是唯一形成全球商业市场的例外。"
+             "碳-12 富集之所以贵，不是化学难，而是这条产线只在四个国家里。", 9, size=10)
+
+
+# ------------------------------------------------------------------ 主流程
+
+def main() -> None:
+    nuclides = pd.read_csv(PROC / "tuia_nuclides.csv")
+    focus = pd.read_csv(PROC / "tuia_focus.csv")
+    elems = pd.read_csv(PROC / "tuia_elements.csv")
+
+    wb = Workbook()
+    sheet_cover(wb, nuclides, focus, elems)
+    sheet_readme(wb)
+    sheet_periodic(wb, elems)
+    sheet_elements(wb, elems)
+    sheet_iptei(wb, elems, focus)
+    sheet_nuclides(wb, nuclides)
+    sheet_focus(wb, focus)
+    sheet_model(wb)
+    sheet_routes(wb)
+    sheet_loops(wb)
+    sheet_scenarios(wb)
+    sheet_sources(wb)
+    sheet_limits(wb)
+    sheet_supply(wb)
+
+    for ws in wb.worksheets:
+        ws.sheet_properties.tabColor = NAVY
+    wb["02_周衍图"].sheet_properties.tabColor = GOLD
+    wb["06_可及性目录"].sheet_properties.tabColor = GOLD
+
+    DIST.mkdir(parents=True, exist_ok=True)
+    wb.save(OUT)
+    print("saved", OUT, f"({OUT.stat().st_size/1024:.0f} KB)")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,60 @@
+﻿Z,元素,中文,英文,供应国数,供应国,国家码,置信度,主流分离工艺,说明
+1,H,氢,Hydrogen,6,美国、俄罗斯、中国、加拿大、印度、阿根廷,US RU CN CA IN AR,中,化学交换/低温蒸馏,重水化学交换/真空蒸馏；CA、IN、AR 有在运重水装置；氚靠反应堆增殖而非分离
+2,He,氦,Helium,2,美国、俄罗斯,US RU,高,低温蒸馏,3He 来自氚衰变库存；4He 由天然气分离，不属同位素富集
+3,Li,锂,Lithium,3,美国、俄罗斯、中国,US RU CN,中,化学交换,COLEX 化学交换 / 真空蒸馏，6Li 与 7Li 分离
+5,B,硼,Boron,3,美国、俄罗斯、中国,US RU CN,中,低温蒸馏/化学交换,BF3 低温蒸馏 / 化学交换，10B 富集到 90%+
+6,C,碳,Carbon,4,美国、俄罗斯、中国、日本,US RU CN JP,中,低温蒸馏/气体离心,CO 低温蒸馏 + 气体离心，12C/13C；CIL（美）、Rosatom Isotope（俄）、上海化工研究院（中）、大阳日酸（日）
+7,N,氮,Nitrogen,4,美国、俄罗斯、中国、日本,US RU CN JP,中,化学交换/低温蒸馏,NO 低温蒸馏 / NNO 化学交换，15N
+8,O,氧,Oxygen,4,美国、俄罗斯、中国、日本,US RU CN JP,中,低温蒸馏/热扩散,水蒸馏 + 热扩散 + CO 蒸馏，18O（PET 靶材上游）
+10,Ne,氖,Neon,2,俄罗斯、美国,RU US,低,低温蒸馏,低温蒸馏，20Ne/22Ne
+12,Mg,镁,Magnesium,2,美国、俄罗斯,US RU,低,电磁分离/激光分离,电磁分离 / 激光分离，26Mg
+14,Si,硅,Silicon,3,俄罗斯、中国、美国,RU CN US,中,气体离心,SiF4 气体离心，28Si（硅量子比特）与 30Si（核嬗变掺杂）
+16,S,硫,Sulfur,2,俄罗斯、美国,RU US,低,气体离心/低温蒸馏,SF6 离心 / 蒸馏，34S/36S
+17,Cl,氯,Chlorine,2,美国、俄罗斯,US RU,低,气体离心,HCl 离心，35Cl/37Cl
+19,K,钾,Potassium,2,美国、俄罗斯,US RU,低,电磁分离/激光分离,电磁分离，40K/41K
+20,Ca,钙,Calcium,2,美国、俄罗斯,US RU,中,电磁分离/激光分离,电磁分离 / 激光分离，48Ca（双β衰变）
+22,Ti,钛,Titanium,2,俄罗斯、美国,RU US,低,气体离心,TiCl4 离心，50Ti
+24,Cr,铬,Chromium,2,俄罗斯、美国,RU US,低,气体离心,CrO2F2 离心，53Cr/54Cr
+26,Fe,铁,Iron,2,俄罗斯、美国,RU US,中,气体离心,Fe(CO)5 离心，56Fe/57Fe/58Fe（57Fe 供 Mössbauer）
+28,Ni,镍,Nickel,2,俄罗斯、美国,RU US,中,气体离心,Ni(CO)4 离心，58Ni/60Ni/64Ni（64Ni 供 64Cu 靶）
+29,Cu,铜,Copper,2,俄罗斯、美国,RU US,低,气体离心/电磁分离,离心 / 电磁分离，63Cu/65Cu
+30,Zn,锌,Zinc,2,俄罗斯、美国,RU US,中,离子交换色谱,离子交换 / 离心，64Zn/68Zn（68Zn 供 67Cu、68Ge）
+31,Ga,镓,Gallium,2,俄罗斯、美国,RU US,中,电磁分离/气体离心,电磁分离 / 离心，69Ga/71Ga（71Ga 曾供太阳中微子实验）
+32,Ge,锗,Germanium,2,俄罗斯、美国,RU US,中,气体离心,GeF4 离心，70Ge/74Ge/76Ge（76Ge 供双β衰变）
+34,Se,硒,Selenium,2,俄罗斯、美国,RU US,中,气体离心,SeF6 离心，74Se/82Se
+35,Br,溴,Bromine,2,美国、俄罗斯,US RU,低,化学交换/气体离心,化学交换 / 离心，79Br/81Br
+36,Kr,氪,Krypton,2,俄罗斯、美国,RU US,低,低温蒸馏,低温蒸馏，78Kr/86Kr
+37,Rb,铷,Rubidium,2,俄罗斯、美国,RU US,中,离子交换色谱/激光分离,离子交换 / 激光分离，85Rb/87Rb
+38,Sr,锶,Strontium,2,俄罗斯、美国,RU US,中,离子交换色谱/激光分离,离子交换 / 激光分离，87Sr/88Sr
+40,Zr,锆,Zirconium,3,俄罗斯、美国、法国,RU US FR,低,气体离心,ZrCl4 离心，90Zr/94Zr
+42,Mo,钼,Molybdenum,2,俄罗斯、美国,RU US,中,气体离心/离子交换色谱,MoF6 离心，92Mo/98Mo/100Mo
+44,Ru,钌,Ruthenium,2,俄罗斯、美国,RU US,低,离子交换色谱/低温蒸馏,离子交换 / 蒸馏，96Ru/104Ru
+46,Pd,钯,Palladium,2,俄罗斯、美国,RU US,低,离子交换色谱,离子交换，102Pd/105Pd
+47,Ag,银,Silver,2,俄罗斯、美国,RU US,低,电磁分离,电磁分离，107Ag/109Ag
+48,Cd,镉,Cadmium,2,俄罗斯、美国,RU US,中,离子交换色谱/激光分离,离子交换 / 激光分离，106Cd/113Cd/116Cd
+49,In,铟,Indium,1,俄罗斯,RU,低,电磁分离,电磁分离，113In/115In
+50,Sn,锡,Tin,2,俄罗斯、美国,RU US,中,气体离心,离心，112Sn/119Sn/124Sn
+51,Sb,锑,Antimony,1,俄罗斯,RU,低,电磁分离,电磁分离，121Sb/123Sb
+52,Te,碲,Tellurium,2,俄罗斯、美国,RU US,中,气体离心,TeF6 离心，128Te/130Te（130Te 供 CUORE 型实验）
+54,Xe,氙,Xenon,2,俄罗斯、美国,RU US,中,低温蒸馏,低温蒸馏，124Xe/129Xe/136Xe（136Xe 供双β衰变）
+56,Ba,钡,Barium,2,俄罗斯、美国,RU US,低,离子交换色谱/激光分离,离子交换 / 激光分离，130Ba/137Ba
+58,Ce,铈,Cerium,2,俄罗斯、美国,RU US,低,离子交换色谱/电磁分离,离子交换，136Ce/142Ce
+60,Nd,钕,Neodymium,2,俄罗斯、美国,RU US,中,离子交换色谱,离子交换，142Nd/143Nd/150Nd
+62,Sm,钐,Samarium,2,俄罗斯、美国,RU US,低,离子交换色谱/电磁分离,离子交换 / 电磁分离，144Sm/147Sm/149Sm
+63,Eu,铕,Europium,2,俄罗斯、美国,RU US,低,离子交换色谱/电磁分离,离子交换 / 电磁分离，151Eu/153Eu
+64,Gd,钆,Gadolinium,3,俄罗斯、美国、中国,RU US CN,中,离子交换色谱,离子交换，155Gd/157Gd
+66,Dy,镝,Dysprosium,2,俄罗斯、美国,RU US,低,离子交换色谱,离子交换，156Dy/164Dy
+68,Er,铒,Erbium,2,俄罗斯、美国,RU US,低,离子交换色谱/电磁分离,离子交换 / 电磁分离，162Er/167Er
+70,Yb,镱,Ytterbium,2,俄罗斯、美国,RU US,中,电磁分离/激光分离,电磁分离 / 激光分离，168Yb/171Yb/173Yb/176Yb
+71,Lu,镥,Lutetium,2,俄罗斯、美国,RU US,中,离子交换色谱/电磁分离,离子交换，175Lu/176Lu
+72,Hf,铪,Hafnium,2,俄罗斯、美国,RU US,低,气体离心,离心，174Hf/176Hf/177Hf
+73,Ta,钽,Tantalum,2,俄罗斯、美国,RU US,低,电磁分离,电磁分离，181Ta
+74,W,钨,Tungsten,3,俄罗斯、美国、中国,RU US CN,中,气体离心,WF6 离心，182W/184W/186W
+75,Re,铼,Rhenium,2,俄罗斯、美国,RU US,低,电磁分离,电磁分离，185Re/187Re
+76,Os,锇,Osmium,2,俄罗斯、美国,RU US,低,离子交换色谱/电磁分离,离子交换 / 蒸馏，187Os/188Os
+77,Ir,铱,Iridium,2,俄罗斯、美国,RU US,低,电磁分离,电磁分离，191Ir/193Ir
+78,Pt,铂,Platinum,2,俄罗斯、美国,RU US,低,离子交换色谱/电磁分离,离子交换，195Pt/198Pt
+80,Hg,汞,Mercury,2,俄罗斯、美国,RU US,低,电磁分离/激光分离,电磁分离 / 激光分离，199Hg/202Hg
+81,Tl,铊,Thallium,2,俄罗斯、美国,RU US,低,电磁分离,电磁分离，203Tl/205Tl
+82,Pb,铅,Lead,2,俄罗斯、美国,RU US,中,电磁分离/激光分离,电磁分离 / 激光分离，206Pb/208Pb
+92,U,铀,Uranium,12,俄罗斯、法国、荷兰、德国、英国、美国、中国、日本、巴西、印度、伊朗、PK,RU FR NL DE UK US CN JP BR IN IR PK,高,气体离心,UF6 气体离心；公开在运的浓缩企业包括 Rosatom/TENEX（俄）、Orano（法）、Urenco（荷/德/英）、Centrus（美）、CNNC（中）、JNFL（日）、INB（巴西）等；印度、伊朗、巴基斯坦另有已公开的浓缩设施

@@ -1,0 +1,16 @@
+# 抓取的原始页面（可重新生成，不入库）
+data/raw/
+
+# 构建日志与临时自检输出
+*.log
+review.txt
+final_check.txt
+verify.txt
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 临时预览图
+docs/figs/_preview-*.png
