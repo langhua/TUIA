@@ -98,7 +98,7 @@ def main() -> None:
             "A": int(a),
             "idx": idx,
             "态": KIND.get(str(idx), f"其他({idx})"),
-            "核素": f"{a}{sym}" if idx == 0 else f"{a}m{idx}{sym}",
+            "核素": f"{int(a)}{sym}" if idx == 0 else f"{int(a)}m{idx}{sym}",
             "态字母": state,
             "质量过剩_keV": mass,
             "质量过剩误差_keV": dmass,

@@ -86,7 +86,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `tuia-heatmap.svg` / `.png` / `@2x.png` | 可及性热力格（与工作簿 `02b` 同构） |
 | `tuia-focus-bars.svg` | 焦点核素评分条形图 |
 
-### `dist/TUIA_同位素可及性全景扩展.xlsx`（17 个工作表）
+### `dist/TUIA_同位素可及性全景扩展.xlsx`（18 个工作表）
 
 | 工作表 | 内容 | 什么时候打开 |
 |---|---|---|
@@ -107,6 +107,7 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `13_供应格局` | 59 个元素的分离产业国、置信度与依据 | 看供应链 |
 | `14_同质异能态` | 2 050 条激发态（m-state）：激发能、半衰期、NUBASE 核对、按能级挂的说明 | 查 m 态 |
 | `15_NUBASE对账` | 基态与激发态的逐条核对：一致 / 有差异 / 显著分歧 / NUBASE 无此能级 | 验数据 |
+| `16_衰变链与发生器` | 由衰变分支算出的子体：36 对发生器候选 + 5 对异构体馈入 + 最长链 | 找发生器 |
 
 ### 中间数据（`data/processed/`）
 
@@ -122,6 +123,8 @@ NV 色心的量子相干时间被 `13C` 的核自旋浴压制 —— 碳在自�
 | `nubase2020.csv` | NUBASE2020 全表解析（5 843 条：3 558 基态 + 2 285 非基态，含激发能与 Jpi） |
 | `ame2020.csv` | AME2020 原子质量表解析（2 550 条：质量过剩、每核子结合能、原子质量） |
 | `ame_vs_nist.csv` | 原子质量对账（2 537 条可比：1 348 完全一致 / 1 046 舍入级 / 143 显著差异） |
+| `decay_graph.csv` | 逐条衰变边（6 588 条：母体/模式/分支%/子体） |
+| `decay_chains.csv` | 每个核素的主导边、链长与「发生器候选」标记（36 对） |
 | `nubase_vs_wiki.csv` | 基态半衰期逐条对账（3 099 条可比，2 932 条一致 = 94.6%） |
 | `nubase_vs_isomers.csv` | 激发态逐条对账（2 050 条：一致 1 823 / 差异 56 / NUBASE 无 35 / 缺值 104） |
 
@@ -180,6 +183,7 @@ python tools/build_dataset.py
 python tools/extract_isomers.py      # 同质异能态（m-state）单表
 python tools/qa_nubase.py            # 基态 + 激发态逐条对账
 python tools/qa_ame.py               # 原子质量对账（AME2020 vs NIST）
+python tools/decay_chains.py         # 衰变子体 → 衰变链与发生器
 
 # 3) 出图与工作簿
 python tools/make_figure.py          # SVG
@@ -283,6 +287,7 @@ TUIA/
    ├─ parse_ame.py                # AME2020 固定宽格式解析
    ├─ qa_nubase.py                # 与 NUBASE2020 对账（基态 + 激发态）
    ├─ qa_ame.py                   # 与 AME2020 对账（原子质量）
+   ├─ decay_chains.py             # 衰变子体、链长、发生器
    ├─ build_dataset.py            # 合并与评分
    ├─ extract_isomers.py          # 抽同质异能态（m-state）
    ├─ build_workbook.py           # 生成 xlsx

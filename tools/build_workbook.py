@@ -230,6 +230,7 @@ def sheet_readme(wb: Workbook) -> None:
         ("13_供应格局", "哪些国家有这条分离产线、置信度多少、口径是什么", "看供应链"),
         ("14_同质异能态", "2050 条激发态：99mTc、229mTh、178m2Hf 都在这里", "查 m 态"),
         ("15_NUBASE对账", "与 IAEA/AMDC 评估表逐条比半衰期，标出分歧", "验数据"),
+        ("16_衰变链与发生器", "由衰变分支算出的子体、长链，与可作发生器的母体-子体对", "找发生器"),
     ]
     header_row(ws, 5, ["#", "工作表", "内容", "什么时候打开"], [4, 22, 60, 34])
     for i, (a, b, c) in enumerate(rows, start=1):
@@ -724,6 +725,10 @@ def sheet_loops(wb: Workbook) -> None:
              "（233U、3H、238Pu、60Co）的长期成本应该按「维持费」而不是「采购价」来算。"
              "这也解释了为什么 238Pu 的稀缺不是因为难做，而是因为能做它的反应堆与 237Np 库存有限。",
              7, size=10)
+    note_row(ws, r + 3,
+             "本页是人工策展的**工艺路线**（反应堆/加速器）；由核数据算出来的**衰变链与发生器**"
+             "（母体比子体长寿 10 倍以上的对）见 16_衰变链与发生器 —— 两者互补：一个有工程，一个有物理。",
+             7, size=9.5)
 
 
 def sheet_scenarios(wb: Workbook) -> None:
@@ -1023,6 +1028,89 @@ def sheet_isomers(wb: Workbook) -> None:
         ws.row_dimensions[r + i].height = 36
 
 
+def sheet_chains(wb: Workbook) -> None:
+    """16_衰变链与发生器：用 NUBASE 的分支算子体，找「母体远长于子体」的发生器对。"""
+    ws = wb.create_sheet("16_衰变链与发生器")
+    title_block(ws, "16 · 衰变链与发生器",
+                "子体不是手写的：按 NUBASE2020 的分支逐条推出来，再筛「母体远长于子体」的对", 7)
+
+    def fmt_t(s) -> str:
+        if s is None or pd.isna(s) or s <= 0:
+            return "—"
+        for unit, v in (("a", 31557600), ("d", 86400), ("h", 3600), ("min", 60),
+                        ("s", 1), ("ms", 1e-3), ("µs", 1e-6), ("ns", 1e-9),
+                        ("ps", 1e-12), ("fs", 1e-15)):
+            if s >= v:
+                return f"{s / v:.3g} {unit}"
+        return f"{s:.2e} s"
+
+    ch = pd.read_csv(PROC / "decay_chains.csv")
+    gen = ch[ch["发生器候选"] == "是"].copy()
+
+    section(ws, 4, f"一、发生器候选（{len(gen)} 对，按母/子半衰期比排序）", 7)
+    note_row(ws, 5, "判据：子体半衰期 1 min – 30 d（洗脱出来能用）、母体 1 d – 200 a（能长期供货）、"
+                    "母/子 ≥ 10（否则子体跟不上、取不到活度）。", 7, size=9)
+    gen_tbl = pd.DataFrame({
+        "母体": gen["核素"],
+        "子体": gen["子体"],
+        "母体半衰期": [fmt_t(x) for x in gen["半衰期_s"]],
+        "子体半衰期": [fmt_t(x) for x in gen["子体半衰期_s"]],
+        "母/子": [f"{x:,.0f}" for x in gen["母/子半衰期比"]],
+        "平衡类型": gen["平衡类型"],
+        "子体在 06 目录": gen["子体已策展"].fillna(""),
+    })
+    end = write_table(ws, gen_tbl, 6, [10, 10, 12, 12, 10, 11, 12], wrap_cols=[])
+    for r in range(7, end + 1):
+        if ws.cell(row=r, column=7).value:
+            for c in range(1, 8):
+                ws.cell(row=r, column=c).fill = PatternFill("solid", fgColor="FFF3CD")
+    ws.auto_filter.ref = f"A6:G{end}"
+    ws.freeze_panes = "C7"
+
+    # ---- 二、BR 看不出来的：馈入同质异能态 ----
+    from curation import ISOMER_GENERATORS
+    r = end + 3
+    section(ws, r, "二、BR 列看不出来的：馈入「同质异能态」的发生器（人工补）", 7)
+    note_row(ws, r + 1, "NUBASE 的分支只写 B-=100，不区分落到基态还是同质异能态，"
+                        "所以 99Mo→99mTc 这类关系算不出来，只能人工列。", 7, size=9)
+    iso_tbl = pd.DataFrame(ISOMER_GENERATORS,
+                           columns=["母体", "子体（激发态）", "母体半衰期", "子体半衰期", "用途"])
+    end2 = write_table(ws, iso_tbl, r + 2, [10, 14, 12, 12, 70], wrap_cols=[5])
+
+    # ---- 三、最长的链 ----
+    r2 = end2 + 3
+    section(ws, r2, "三、最长的衰变链（只走主导分支，遇稳定核素停）", 7)
+    top = ch.sort_values(["链长", "半衰期_s"], ascending=[False, False]).head(24)
+    chain_tbl = pd.DataFrame({
+        "核素": top["核素"],
+        "半衰期": [fmt_t(x) for x in top["半衰期_s"]],
+        "链长": top["链长"],
+        "链": top["链"],
+    })
+    end3 = write_table(ws, chain_tbl, r2 + 1, [10, 12, 6, 150], wrap_cols=[4])
+    for rr in range(r2 + 2, end3 + 1):
+        ws.row_dimensions[rr].height = 22
+
+    # ---- 四、口径 ----
+    r3 = end3 + 3
+    section(ws, r3, "口径与局限", 7)
+    notes = [
+        "① 子体按核电荷与质量数守恒推：β− → Z+1；β+/EC → Z−1；α → Z−2、A−4；"
+        "β−n → Z+1、A−1；p → Z−1、A−1；簇放射（¹⁴C、²⁴Ne…）按簇减去 Z 与 A；IT 不换核素、SF 碎片不唯一，都不连边。",
+        "② 只走**主导分支**（分支比最大的那一条）：真实核素常有 2–3 条并行分支，"
+        "完整的分支树见 `decay_graph.csv`（6588 条边）。",
+        "③ 同质异能态没有当作独立节点：99mTc 的边记在 99Tc 上，落到基态即止。"
+        "这也是「99Mo→99mTc」必须人工补的原因。",
+        "④ 「平衡类型」只按半衰期比粗分：≥100 记长期平衡（子体随时在库），否则瞬时平衡。"
+        "真实洗脱活度还要看分支比、发生器装柱量与淋洗效率。",
+        "⑤ 09_再生闭环 里那张表是**人工策展的工艺路线**（反应堆/加速器路径），"
+        "本页是**由核数据算出来的衰变关系**，两者互补：一个有工程，一个有物理。",
+    ]
+    for i, t in enumerate(notes, start=1):
+        note_row(ws, r3 + i, t, 7, size=9.5)
+        ws.row_dimensions[r3 + i].height = 32
+
+
 def sheet_nubase_qa(wb: Workbook) -> None:
     """15_数据对账：把现有（维基来源）基态数据与 NUBASE2020 逐条比半衰期。"""
     ws = wb.create_sheet("15_NUBASE对账")
@@ -1173,6 +1261,7 @@ def main() -> None:
     sheet_supply(wb)
     sheet_isomers(wb)
     sheet_nubase_qa(wb)
+    sheet_chains(wb)
 
     for ws in wb.worksheets:
         ws.sheet_properties.tabColor = NAVY
