@@ -39,6 +39,8 @@ _TIME_UNITS = {
     "s": 1.0, "min": 60.0, "h": 3600.0, "d": 86400.0,
     "y": 3.155693e7, "a": 3.155693e7, "ky": 3.155693e10, "Ma": 3.155693e13,
     "Ga": 3.155693e16, "ka": 3.155693e10,
+    "Ty": 3.155693e19, "Py": 3.155693e22, "Ey": 3.155693e25,
+    "Zy": 3.155693e28, "Yy": 3.155693e31,
 }
 
 
@@ -55,23 +57,30 @@ def parse_half_life(text: str) -> tuple[float | None, str]:
     if "stable" in t.lower():
         return None, "stable"
     t = t.replace("\u00a0", " ").replace("\u2212", "-").replace("−", "-")
-    # 去掉脚注 [n 3]、上标引用 [1]、以及"(1.4)"这类不确定度
+    # 去掉脚注 [n 3]、上标引用 [1]
     t = re.sub(r"\[[^\]]*\]", "", t)
-    t = re.sub(r"\([^)]*\)", "", t)
+    # 去掉不确定度括号。要**反复**剥：76Ge 写作
+    # "2.022(0.018 (stat), 0.038 (sys))×1021 y"，一次替换会留下残渣，
+    # 导致后面的 ×10^21 匹配不上（曾把 6.4e28 s 静默算成 6.4e7 s）。
+    prev = None
+    while prev != t:
+        prev = t
+        t = re.sub(r"\([^()]*\)", "", t)
     t = t.strip()
+    # “2 ms#”“67 s?”：尾随的 # 是「由系统性估得」，? 是「待定」；
+    # 不剔掉会让单位正则匹配失败、退回默认的 s —— 于是 2 ms 静默变成 2 s（差 1000 倍）。
+    t = t.replace("#", " ").replace("?", " ").strip()
     limit = bool(re.match(r"^[<≤>≥]", t))
     t = t.lstrip("<≤>≥~≈ ").strip()
 
-    # 指数形式：×10 后面直接跟指数数字（HTML 上标被压平）
-    m = re.search(r"([0-9]*\.?[0-9]+)\s*[×x]\s*10\s*(-?\d+)", t)
-    if m:
-        value = float(m.group(1)) * 10.0 ** int(m.group(2))
-    else:
-        m = re.search(r"([0-9]*\.?[0-9]+)", t)
-        if not m:
-            return None, "unknown"
-        value = float(m.group(1))
-        # "1.2 e5" 之类
+    m = re.search(r"([0-9]*\.?[0-9]+)", t)
+    if not m:
+        return None, "unknown"
+    value = float(m.group(1))
+    # 指数形式：×10 后面直接跟指数数字（HTML 上标被压平），可与系数分开出现
+    exp = re.search(r"[×x]\s*10\s*\^?\s*(-?\d+)", t)
+    if exp:
+        value *= 10.0 ** int(exp.group(1))
     munit = re.search(r"([a-zA-Zµμ]+)\s*$", t)
     unit = munit.group(1) if munit else "s"
     if unit in _TIME_UNITS:

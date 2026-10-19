@@ -229,6 +229,7 @@ def sheet_readme(wb: Workbook) -> None:
         ("12_使用与局限", "口径、易错点、如何扩展到数千个核素", "别踩坑"),
         ("13_供应格局", "哪些国家有这条分离产线、置信度多少、口径是什么", "看供应链"),
         ("14_同质异能态", "2050 条激发态：99mTc、229mTh、178m2Hf 都在这里", "查 m 态"),
+        ("15_NUBASE对账", "与 IAEA/AMDC 评估表逐条比半衰期，标出分歧", "验数据"),
     ]
     header_row(ws, 5, ["#", "工作表", "内容", "什么时候打开"], [4, 22, 60, 34])
     for i, (a, b, c) in enumerate(rows, start=1):
@@ -979,8 +980,10 @@ def sheet_isomers(wb: Workbook) -> None:
     notes = [
         "① 05_同位素全景 只收**基态**核素；本表是同一批质量数上的激发态（m、m1、m2…）。"
         "核医学里最重要的一批核素全部属于这一类：99mTc（6.01 h）、111mIn、137mBa。",
-        "② 数据来自 Wikipedia 逐元素同位素表的全量提取，共 2050 条 —— 比 NUBASE 的精选口径（约 700 条）更宽，"
-        "包含许多只有纳秒寿命的高激发态。做计算请以 NUBASE2020 为准。",
+        "② 数据来自 Wikipedia 逐元素同位素表的全量提取，共 2050 条。对照 NUBASE2020：\n"
+        "   评估值共 2285 个非基态条目（1841 同质异能态 + 243 能级 + 186 IAS + 11 共振），两边口径不同 ——\n"
+        "   维基偏「文献报过就收」，NUBASE 偏「评估过才收」。做计算一律以 NUBASE2020 为准，\n"
+        "   逐条对账见 15_NUBASE对账。",
         "③ 黄色行是人工加过说明的：229mTh 的核跃迁能量仅约 8 eV，是核钟的物理基础；"
         "178m2Hf（31 年）曾被寄望为「核同质异能储能」，其可行性已被反复证伪。",
         "④ 同质异能态的「可及性」与基态完全不同：99mTc 由 99Mo 发生器洗脱，"
@@ -989,6 +992,79 @@ def sheet_isomers(wb: Workbook) -> None:
     for i, t in enumerate(notes, start=1):
         note_row(ws, r + i, t, 9, size=9.5)
         ws.row_dimensions[r + i].height = 34
+
+
+def sheet_nubase_qa(wb: Workbook) -> None:
+    """15_数据对账：把现有（维基来源）基态数据与 NUBASE2020 逐条比半衰期。"""
+    ws = wb.create_sheet("15_NUBASE对账")
+    title_block(ws, "15 · 与 NUBASE2020 对账",
+                "半衰期是我们最怕出错的一列 —— 拿 IAEA/AMDC 的评估表逐条校一遍", 10)
+
+    cmp = pd.read_csv(PROC / "nubase_vs_wiki.csv")
+    nb = pd.read_csv(PROC / "nubase2020.csv")
+    n_all, n_gs = len(nb), int((nb["idx"] == 0).sum())
+    n_nong = n_all - n_gs
+    vc = cmp["判定"].value_counts()
+    n_cmp = len(cmp)
+    n_same = int(vc.get("一致", 0))
+    n_diff = int(vc.get("有差异", 0))
+    n_big = int(vc.get("显著分歧", 0))
+
+    section(ws, 4, "一、对账结果", 10)
+    stats = [
+        ("NUBASE2020 行数", f"{n_all}", "含基态、同质异能态、能级、共振、IAS"),
+        ("其中基态", f"{n_gs}", "用来和 05_同位素全景 逐条比"),
+        ("其中非基态", f"{n_nong}", "1841 同质异能态 + 243 能级 + 186 IAS + 11 共振"),
+        ("两边都有（基态）", f"{n_cmp if n_cmp else 0}", "按 (Z, A) 连接后的可比半衰期条数"),
+        ("半衰期一致（±5%）", f"{n_same}（{n_same / max(n_cmp, 1):.1%}）", "|Δlog10| ≤ 0.02"),
+        ("有差异（5%–2×）", f"{n_diff}", "多半是四舍五入或评估更新"),
+        ("显著分歧（>2×）", f"{n_big}", "见下表，需人工复核"),
+    ]
+    header_row(ws, 5, ["指标", "数值", "说明"], [30, 22, 78])
+    for i, (k, v, note) in enumerate(stats, start=1):
+        for j, val in enumerate((k, v, note), start=1):
+            cell = ws.cell(row=5 + i, column=j, value=val)
+            cell.font = Font(name="微软雅黑", size=9.5, bold=(j == 1), color=INK)
+            cell.border = BOX
+            cell.alignment = Alignment(vertical="center", wrap_text=(j == 3))
+            if i % 2 == 0:
+                cell.fill = PatternFill("solid", fgColor=CREAM)
+
+    rows = []
+    for _, r in cmp.iterrows():
+        rows.append({
+            "Z": int(r["Z"]), "元素": r["元素"], "核素": r["核素"],
+            "维基半衰期": r["维基半衰期"],
+            "维基_秒": r["维基_秒"], "NUBASE_秒": r["NUBASE_秒"],
+            "比值": round(float(r["比值"]), 4) if pd.notna(r["比值"]) else None,
+            "log10差": round(float(r["log10差"]), 3) if pd.notna(r["log10差"]) else None,
+            "判定": r["判定"],
+        })
+    df = pd.DataFrame(rows).sort_values("log10差", key=lambda s: s.abs(),
+                                        ascending=False)
+    widths = [5, 7, 13, 26, 14, 14, 10, 9, 11]
+    end = write_table(ws, df, 14, widths, wrap_cols=[4], score_cols=[])
+    for r_ in range(15, end + 1):
+        j = ws.cell(row=r_, column=9).value
+        if j and j != "一致":
+            ws.cell(row=r_, column=9).fill = PatternFill(
+                "solid", fgColor="FFCDD2" if j == "显著分歧" else "FFE0B2")
+    ws.auto_filter.ref = f"A14:I{end}"
+    ws.freeze_panes = "C15"
+
+    r = end + 2
+    section(ws, r, "口径", 10)
+    notes = [
+        "① 只比基态：两边的激发态收录范围不同（维基 2050 条 vs NUBASE 2285 个非基态条目），无法一一对应。",
+        "② 「一致」= |log10(维基/NUBASE)| ≤ 0.02（约 5%）；5%–2 倍记「有差异」；超过 2 倍记「显著分歧」。",
+        "③ 用比值而不是差：半衰期跨 30 个数量级，只有比值才有可比性。",
+        "④ 显著分歧里有相当一部分是 NUBASE 的「系统性估计」（文件名里带 # 的数），"
+        "这类值本就只是量级参考，不能当成测量值。",
+        "⑤ 本表只核对半衰期；质量、自旋、衰变分支尚未逐条比对。",
+    ]
+    for i, t in enumerate(notes, start=1):
+        note_row(ws, r + i, t, 10, size=9.5)
+        ws.row_dimensions[r + i].height = 30
 
 
 # ------------------------------------------------------------------ 主流程
@@ -1015,6 +1091,7 @@ def main() -> None:
     sheet_limits(wb)
     sheet_supply(wb)
     sheet_isomers(wb)
+    sheet_nubase_qa(wb)
 
     for ws in wb.worksheets:
         ws.sheet_properties.tabColor = NAVY
